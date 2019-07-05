@@ -125,10 +125,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
-import java.util.HashSet;
-import java.lang.IllegalArgumentException;
-import java.lang.String;
 
 import static org.apache.calcite.util.Static.RESOURCE;
 
@@ -154,9 +150,6 @@ public class ${parser.class} extends SqlAbstractParserImpl
     private Casing quotedCasing;
     private int identifierMaxLength;
     private SqlConformance conformance;
-
-    private static Set<String> validDataType = new HashSet<String>();
-
 
     /**
      * {@link SqlParserImplFactory} implementation for creating parser.
@@ -254,14 +247,6 @@ void debug_message1() {
 JAVACODE String unquotedIdentifier() {
     return SqlParserUtil.strip(getToken(0).image, null, null, null,
         unquotedCasing);
-}
-
-JAVACODE
-void checkStreamDataType(String type) {
-    if (validDataType.contains(type)) {
-        return;
-    }
-    throw new IllegalArgumentException("Unsupported data type: " + type);
 }
 
 /**
