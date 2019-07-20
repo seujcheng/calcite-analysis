@@ -7,16 +7,17 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ *
  * @author hanhan.zhang
  * */
-public class SqlProperty extends SqlCall {
+public class SqlPropertyNode extends SqlCall {
 
-    private static final SqlOperator OPERATOR = new SqlSpecialOperator("SQL_PRO", SqlKind.DESCRIBE_TABLE);
+    private static final SqlOperator OPERATOR = new SqlSpecialOperator("SQL_PROPERTY", SqlKind.ATTRIBUTE_DEF);
 
     private final SqlIdentifier key;
     private final SqlNode value;
 
-    public SqlProperty(SqlParserPos pos, SqlIdentifier key, SqlNode value) {
+    public SqlPropertyNode(SqlParserPos pos, SqlIdentifier key, SqlNode value) {
         super(pos);
         this.key = key;
         this.value = value;
@@ -39,11 +40,11 @@ public class SqlProperty extends SqlCall {
         value.unparse(writer, leftPrec, rightPrec);
     }
 
-    public String getSqlPropertyName() {
+    public String getPropertyName() {
         return key.toString();
     }
 
-    public String getSqlPropertyValue() {
+    public String getPropertyValue() {
         return ((SqlLiteral) value).toValue();
     }
 }

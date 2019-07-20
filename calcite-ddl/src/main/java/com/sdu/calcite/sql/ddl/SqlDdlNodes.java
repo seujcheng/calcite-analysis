@@ -69,13 +69,6 @@ public class SqlDdlNodes {
     };
   }
 
-  public static SqlCreateFunction createFunction(
-          SqlParserPos pos, boolean replace, boolean ifNotExists, SqlIdentifier name,
-          SqlNode className, SqlNodeList usingList) {
-    return new SqlCreateFunction(pos, replace, ifNotExists, name,
-            className, usingList);
-  }
-
   public static SqlNode column(
           SqlParserPos pos, SqlIdentifier name, SqlDataTypeSpec dataType, SqlNode expression, ColumnStrategy strategy) {
     return new SqlColumnDeclaration(pos, name, dataType, expression, strategy);

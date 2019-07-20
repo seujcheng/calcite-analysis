@@ -81,13 +81,22 @@ SqlNodeList TableElementList() :
     }
 }
 
-SqlNodeList TableProperties() :
+/**
+(name = value [, name = value]*)
+LPAREN: 左括号
+COMMA: 逗号
+RPAREN: 右括号
+**/
+SqlNodeList DefineProperties() :
 {
     final Span s = Span.of();
     final List<SqlNode> list = new ArrayList<SqlNode>();
 }
 {
-    <LPAREN> { s.add(this); }
+    <LPAREN>
+    {
+        s.add(this);
+    }
     PropertyDef(list)
     (
         <COMMA> PropertyDef(list)
@@ -98,6 +107,9 @@ SqlNodeList TableProperties() :
     }
 }
 
+/**
+name = value
+**/
 void PropertyDef(List<SqlNode> list) :
 {
     final Span s = Span.of();
@@ -109,8 +121,39 @@ void PropertyDef(List<SqlNode> list) :
     <EQ>
     val = Literal()
     {
-        list.add(new SqlProperty(s.end(val), name, val));
+        list.add(new SqlPropertyNode(s.end(val), name, val));
     }
+}
+
+void KeyWithProperties(Map<String, SqlNodeList> jobConf) :
+{
+   final SqlIdentifier name;
+   final SqlNodeList properties;
+}
+{
+   name = SimpleIdentifier()
+   <WITH>
+      properties = DefineProperties()
+   {
+       jobConf.put(name.toString(), properties);
+   }
+}
+
+/**
+key WITH (name = value [, name = value]*) [, key WITH (name = value [, name = value]*)]*
+**/
+Map<String, SqlNodeList> KeyWithMultiProperties() :
+{
+  final Map<String, SqlNodeList> keyProperties = new HashMap<String, SqlNodeList>();
+}
+{
+   KeyWithProperties(keyProperties)
+   (
+       <COMMA> KeyWithProperties(keyProperties)
+   )*
+   {
+      return keyProperties;
+   }
 }
 
 void TableElement(List<SqlNode> list) :
@@ -201,58 +244,69 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
     <TABLE> ifNotExists = IfNotExistsOpt() id = CompoundIdentifier()
     [ tableElementList = TableElementList() ]
     [ <AS> query = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY) ]
-    [<WITH> tableDescriptor = TableProperties() ]
+    [<WITH> tableDescriptor = DefineProperties() ]
     {
         return new SqlCreateTable(s.end(this), replace, ifNotExists,
                 id, tableElementList, tableDescriptor, null);
     }
 }
 
-
-private void FunctionJarDef(SqlNodeList usingList) :
-{
-    final SqlDdlNodes.FileType fileType;
-    final SqlNode uri;
-}
-{
-    (
-        <ARCHIVE> { fileType = SqlDdlNodes.FileType.ARCHIVE; }
-    |
-        <FILE> { fileType = SqlDdlNodes.FileType.FILE; }
-    |
-        <JAR> { fileType = SqlDdlNodes.FileType.JAR; }
-    ) {
-        usingList.add(SqlLiteral.createSymbol(fileType, getPos()));
-    }
-    uri = StringLiteral() {
-        usingList.add(uri);
-    }
-}
-
+/**
+CREATE FUNCTION function_name AS class_name [WITH ( name = value [, name = value]* )]
+**/
 SqlCreate SqlCreateFunction(Span s, boolean replace) :
 {
-    final boolean ifNotExists;
-    final SqlIdentifier id;
+    final SqlIdentifier name;
     final SqlNode className;
-    SqlNodeList usingList = SqlNodeList.EMPTY;
+    SqlNodeList properties = null;
 }
 {
-    <FUNCTION> ifNotExists = IfNotExistsOpt()
-    id = CompoundIdentifier()
+    <FUNCTION>
+        name = SimpleIdentifier()
     <AS>
-    className = StringLiteral()
-    [
-        <USING> {
-            usingList = new SqlNodeList(getPos());
-        }
-        FunctionJarDef(usingList)
-        (
-            <COMMA>
-            FunctionJarDef(usingList)
-        )*
-    ] {
-        return SqlDdlNodes.createFunction(s.end(this), replace, ifNotExists,
-            id, className, usingList);
+        className = StringLiteral()
+    [ <WITH> properties = DefineProperties() ]
+    {
+        return new SqlCreateFunction(s.end(this), name, className, properties);
+    }
+}
+
+/**
+USE FUNCTION function_name AS class_name WITH (name = value [, name = value]*)
+**/
+SqlCall SqlUseFunction() :
+{
+   final Span s = Span.of();
+   final SqlIdentifier name;
+   final SqlNode className;
+   SqlNodeList properties = null;
+}
+{
+    <USE> <FUNCTION>
+        name = SimpleIdentifier()
+    <AS>
+        className = StringLiteral()
+    [ <WITH> properties = DefineProperties() ]
+    {
+        return new SqlUseFunction(s.end(this), name, className, properties);
+    }
+}
+
+/**
+DEFINE JOB job_name SET key WITH (name = value [, name = value]*) [, key WITH (name = value [, name = value]*)]
+**/
+SqlCall SqlJobDefine() :
+{
+   final Span s = Span.of();
+   final SqlIdentifier name;
+   Map<String, SqlNodeList> jobConf = null;
+}
+{
+    <DEFINE> <JOB>
+        name = SimpleIdentifier()
+    [ <SET> jobConf = KeyWithMultiProperties() ]
+    {
+        return new SqlJobDefine(s.end(this), name, jobConf);
     }
 }
 

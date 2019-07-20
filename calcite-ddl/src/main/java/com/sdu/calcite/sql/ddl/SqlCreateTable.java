@@ -31,10 +31,7 @@ import org.apache.calcite.util.ImmutableNullableList;
 import org.apache.calcite.util.Pair;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static org.apache.calcite.util.Static.RESOURCE;
 
@@ -48,7 +45,7 @@ public class SqlCreateTable extends SqlCreate implements SqlExecutableStatement 
     // table column
     private final SqlNodeList columnList;
     // table descriptor
-    private final SqlNodeList tableProperties;
+    private final SqlNodeList properties;
     private final SqlNode query;
 
     private static final SqlOperator OPERATOR =
@@ -60,17 +57,13 @@ public class SqlCreateTable extends SqlCreate implements SqlExecutableStatement 
         super(OPERATOR, pos, replace, ifNotExists);
         this.name = Objects.requireNonNull(name);
         this.columnList = columnList; // may be null
-        this.tableProperties = descriptor;
+        this.properties = descriptor;
         this.query = query; // for "CREATE TABLE ... AS query"; may be null
-    }
-
-    public SqlNodeList getTableProperties() {
-        return tableProperties;
     }
 
     @Override
     public List<SqlNode> getOperandList() {
-        return ImmutableNullableList.of(name, columnList, query);
+        return ImmutableNullableList.of(name, columnList, query, properties);
     }
 
     @Override
@@ -84,14 +77,26 @@ public class SqlCreateTable extends SqlCreate implements SqlExecutableStatement 
         if (columnList != null) {
             SqlDdlNodes.unparser(writer, columnList);
         }
-        if (tableProperties != null) {
-            SqlDdlNodes.unparser(writer, tableProperties);
+        if (properties != null) {
+            SqlDdlNodes.unparser(writer, properties);
         }
         if (query != null) {
             writer.keyword("AS");
             writer.newlineAndIndent();
             query.unparse(writer, 0, 0);
         }
+    }
+
+    public Map<String, String> getTableProperties() {
+        if (properties == null) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> props = new HashMap<>();
+        for (SqlNode node : properties) {
+            SqlPropertyNode propertyNode = (SqlPropertyNode) node;
+            props.put(propertyNode.getPropertyName(), propertyNode.getPropertyValue());
+        }
+        return props;
     }
 
     @Override

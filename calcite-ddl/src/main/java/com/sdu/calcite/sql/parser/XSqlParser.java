@@ -1,5 +1,6 @@
 package com.sdu.calcite.sql.parser;
 
+import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.parser.SqlAbstractParserImpl;
@@ -17,7 +18,9 @@ public class XSqlParser {
 
     static {
         config = SqlParser.configBuilder()
-                .setCaseSensitive(false)
+                .setCaseSensitive(true)
+                // 禁止转为大写
+                .setUnquotedCasing(Casing.UNCHANGED)
                 .setParserFactory(new SqlParserImplFactoryImpl())
                 .build();
     }
