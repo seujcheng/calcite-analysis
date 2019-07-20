@@ -11,6 +11,7 @@
 
     <modules>
         <module>calcite-ddl</module>
+        <module>calcite-rule</module>
     </modules>
 
     <properties>
