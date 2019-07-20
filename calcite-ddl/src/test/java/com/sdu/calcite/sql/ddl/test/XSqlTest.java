@@ -2,6 +2,7 @@ package com.sdu.calcite.sql.ddl.test;
 
 import com.sdu.calcite.sql.parser.XSqlParser;
 import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.dialect.MysqlSqlDialect;
 import org.junit.Test;
 
 public class XSqlTest {
@@ -13,7 +14,7 @@ public class XSqlTest {
                 "type = 'kafka', is_sink_table = false)";
         SqlNode node = XSqlParser.parseOne(sql);
 
-        System.out.println(node.getKind());
+        System.out.println(node.toSqlString(MysqlSqlDialect.DEFAULT));
     }
 
 }

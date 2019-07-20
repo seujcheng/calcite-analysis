@@ -1,6 +1,5 @@
 package com.sdu.calcite.sql.parser;
 
-import org.apache.calcite.config.Lex;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.parser.SqlAbstractParserImpl;
@@ -8,7 +7,6 @@ import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserImplFactory;
 
 import java.io.Reader;
-import java.io.StringReader;
 
 /**
  * @author hanhan.zhang
@@ -19,6 +17,7 @@ public class XSqlParser {
 
     static {
         config = SqlParser.configBuilder()
+                .setCaseSensitive(false)
                 .setParserFactory(new SqlParserImplFactoryImpl())
                 .build();
     }
