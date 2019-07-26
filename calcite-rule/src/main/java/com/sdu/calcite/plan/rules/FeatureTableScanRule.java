@@ -1,8 +1,10 @@
 package com.sdu.calcite.plan.rules;
 
-import com.sdu.calcite.plan.nodes.Conventions;
+import com.sdu.calcite.plan.FeatureStreamRel;
 import com.sdu.calcite.plan.nodes.FeatureTableScan;
 import com.sdu.calcite.table.FeatureStreamTable;
+import org.apache.calcite.adapter.enumerable.EnumerableConvention;
+import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
 import org.apache.calcite.plan.Convention;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelTraitSet;
@@ -17,8 +19,11 @@ import org.apache.calcite.rel.logical.LogicalTableScan;
  * */
 public class FeatureTableScanRule extends ConverterRule {
 
-    public FeatureTableScanRule() {
-        super(LogicalTableScan.class, Convention.NONE, Conventions.FEATURESTREAM, "FeatureTableScanRule");
+    public static final FeatureTableScanRule INSTANCE = new FeatureTableScanRule();
+
+    private FeatureTableScanRule() {
+        // RelTrait of LogicalTableScan is NONE
+        super(LogicalTableScan.class, Convention.NONE, FeatureStreamRel.CONVENTION, "FeatureTableScanRule");
     }
 
     @Override
@@ -35,7 +40,7 @@ public class FeatureTableScanRule extends ConverterRule {
         TableScan scan = (TableScan) rel;
 
         // TraitSet: 表示转的目标RelNode特征
-        RelTraitSet traitSet = scan.getTraitSet().replace(Conventions.FEATURESTREAM);
+        RelTraitSet traitSet = scan.getTraitSet().replace(FeatureStreamRel.CONVENTION);
 
         return new FeatureTableScan(scan.getCluster(), traitSet, scan.getTable());
     }
