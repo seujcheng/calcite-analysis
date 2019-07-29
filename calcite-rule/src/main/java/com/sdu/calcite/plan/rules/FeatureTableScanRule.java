@@ -1,10 +1,8 @@
 package com.sdu.calcite.plan.rules;
 
-import com.sdu.calcite.plan.FeatureStreamRel;
+import com.sdu.calcite.plan.FeatureRel;
 import com.sdu.calcite.plan.nodes.FeatureTableScan;
-import com.sdu.calcite.table.FeatureStreamTable;
-import org.apache.calcite.adapter.enumerable.EnumerableConvention;
-import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
+import com.sdu.calcite.table.FeatureTable;
 import org.apache.calcite.plan.Convention;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelTraitSet;
@@ -23,14 +21,14 @@ public class FeatureTableScanRule extends ConverterRule {
 
     private FeatureTableScanRule() {
         // RelTrait of LogicalTableScan is NONE
-        super(LogicalTableScan.class, Convention.NONE, FeatureStreamRel.CONVENTION, "FeatureTableScanRule");
+        super(LogicalTableScan.class, Convention.NONE, FeatureRel.CONVENTION, "FeatureTableScanRule");
     }
 
     @Override
     public boolean matches(RelOptRuleCall call) {
         TableScan scan = call.rel(0);
-        // 判断扫描表是否是 FeatureStreamTable 类型
-        FeatureStreamTable table = scan.getTable().unwrap(FeatureStreamTable.class);
+        // 判断扫描表是否是 FeatureTable 类型
+        FeatureTable table = scan.getTable().unwrap(FeatureTable.class);
         return table != null;
     }
 
@@ -40,7 +38,7 @@ public class FeatureTableScanRule extends ConverterRule {
         TableScan scan = (TableScan) rel;
 
         // TraitSet: 表示转的目标RelNode特征
-        RelTraitSet traitSet = scan.getTraitSet().replace(FeatureStreamRel.CONVENTION);
+        RelTraitSet traitSet = scan.getTraitSet().replace(FeatureRel.CONVENTION);
 
         return new FeatureTableScan(scan.getCluster(), traitSet, scan.getTable());
     }

@@ -4,9 +4,9 @@ import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.sql.type.SqlTypeName;
 
-public class FeatureStreamTable extends InlineTable {
+public class FeatureTable extends InlineTable {
 
-    public FeatureStreamTable(String[] columnNames, Class<?>[] columnTypes) {
+    public FeatureTable(String[] columnNames, Class<?>[] columnTypes) {
         super(columnNames, columnTypes);
     }
 
