@@ -38,9 +38,9 @@ public class FeatureTableScanRule extends ConverterRule {
         TableScan scan = (TableScan) rel;
 
         // TraitSet: 表示转的目标RelNode特征
-        RelTraitSet traitSet = scan.getTraitSet().replace(FeatureRel.CONVENTION);
+        RelTraitSet traitSet = scan.getTraitSet().plus(FeatureRel.CONVENTION);
 
-        return new FeatureTableScan(scan.getCluster(), traitSet, scan.getTable());
+        return FeatureTableScan.create(scan.getCluster(), traitSet, scan.getTable());
     }
 
 }

@@ -1,11 +1,5 @@
 package com.sdu.calcite;
 
-import com.sdu.calcite.plan.FeatureRelBuilder;
-import com.sdu.calcite.plan.FeatureSqlValidator;
-import com.sdu.calcite.plan.rules.FeatureProjectRule;
-import com.sdu.calcite.plan.rules.FeatureTableScanRule;
-import com.sdu.calcite.table.FeatureTable;
-import com.sdu.calcite.utils.CalciteSqlUtils;
 import org.apache.calcite.config.Lex;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.plan.RelOptCluster;
@@ -30,6 +24,13 @@ import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 
+import com.sdu.calcite.plan.FeatureRelBuilder;
+import com.sdu.calcite.plan.FeatureSqlValidator;
+import com.sdu.calcite.plan.rules.FeatureTableScanRule;
+import com.sdu.calcite.plan.rules.PushProjectIntoTableScanRule;
+import com.sdu.calcite.table.FeatureTable;
+import com.sdu.calcite.utils.CalciteSqlUtils;
+
 import java.util.List;
 
 import static java.lang.Integer.MAX_VALUE;
@@ -51,13 +52,15 @@ public class CalciteBootstrap {
     }
 
     public static void main(String[] args) throws Exception {
-        final String sql = "SELECT" +
-                           " p.poi_id, label, deal_id, name " +
-                           "FROM " +
-                           " tps_domain p " +
-                           "JOIN tqs_domain q ON p.poi_id = q.poi_id " +
-                           "WHERE " +
-                           " deal_id = 11";
+//        final String sql = "SELECT" +
+//                           " p.poi_id, label, deal_id, name " +
+//                           "FROM " +
+//                           " tps_domain p " +
+//                           "JOIN tqs_domain q ON p.poi_id = q.poi_id " +
+//                           "WHERE " +
+//                           " deal_id = 11";
+
+        final String sql = "SELECT poi_id, label FROM tps_domain";
 
         // 元数据
         SchemaPlus defaultSchema = CalciteSchema
@@ -113,7 +116,7 @@ public class CalciteBootstrap {
 
         RelRoot root = sqlToRelConverter.convertQuery(validateSqlNode, false, true);
 
-//        System.out.println(RelOptUtil.toString(root.rel, SqlExplainLevel.NON_COST_ATTRIBUTES));
+        System.out.println(RelOptUtil.toString(root.rel, SqlExplainLevel.NON_COST_ATTRIBUTES));
 
         // step4: 优化执行计划
         // HepPlanner采用Greedy算法(贪婪算法), 将每次运行的Rule使用HepProgram进行封装.
@@ -123,7 +126,8 @@ public class CalciteBootstrap {
         //     MatchOrder则表示每次rule执行的顺序: ARBITRARY、BOTTOM_UP、TOP_DOWN三种方式, 其中ARBITRARY被认为是最高效的apply方式
         HepProgramBuilder programBuilder = new HepProgramBuilder()
                 .addRuleInstance(FeatureTableScanRule.INSTANCE)
-                .addRuleInstance(FeatureProjectRule.INSTANCE)
+                // 先转为FeatureTableScan, '谓词下推'
+                .addRuleInstance(PushProjectIntoTableScanRule.INSTANCE)
                 .addMatchLimit(10)
                 .addMatchOrder(HepMatchOrder.TOP_DOWN);
         HepPlanner hepPlanner = new HepPlanner(programBuilder.build(), frameworkConfig.getContext());
