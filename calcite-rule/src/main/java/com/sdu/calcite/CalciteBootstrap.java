@@ -24,8 +24,10 @@ import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 
+import com.sdu.calcite.plan.FeaturePlanner;
 import com.sdu.calcite.plan.FeatureRelBuilder;
 import com.sdu.calcite.plan.FeatureSqlValidator;
+import com.sdu.calcite.plan.FeatureTableEnvironment;
 import com.sdu.calcite.plan.rules.FeatureTableScanRule;
 import com.sdu.calcite.plan.rules.PushProjectIntoTableScanRule;
 import com.sdu.calcite.table.FeatureTable;
@@ -62,59 +64,31 @@ public class CalciteBootstrap {
 
         final String sql = "SELECT poi_id, label FROM tps_domain";
 
-        // 元数据
-        SchemaPlus defaultSchema = CalciteSchema
-                .createRootSchema(false, false)
-                .plus();
-
-        // 注册表
+        // 定义表
         FeatureTable poiTable = new FeatureTable(
                 new String[] {"poi_id", "label"},
                 new Class<?>[] {Long.class, String.class});
-        defaultSchema.add("tps_domain", poiTable);
-
         FeatureTable dealTable = new FeatureTable(
                 new String[] {"deal_id", "poi_id", "name"},
                 new Class<?>[] {Long.class, Long.class, String.class});
-        defaultSchema.add("tqs_domain", dealTable);
 
+        //
+        FeatureTableEnvironment tableEnv = new FeatureTableEnvironment();
+        tableEnv.registerTable("tps_domain", poiTable);
+        tableEnv.registerTable("tqs_domain", dealTable);
 
-        SqlToRelConverter.Config toRelConvertConfig = SqlToRelConverter.configBuilder()
-                // TableScan --> LogicalTableScan
-                .withConvertTableAccess(false)
-                .withInSubQueryThreshold(MAX_VALUE)
-                .build();
-        FrameworkConfig frameworkConfig = Frameworks
-                .newConfigBuilder()
-                .defaultSchema(defaultSchema)
-                .parserConfig(SqlParser.configBuilder().setLex(Lex.JAVA).build())
-                .typeSystem(RelDataTypeSystem.DEFAULT)
-                .operatorTable(SqlStdOperatorTable.instance())
-                .sqlToRelConverterConfig(toRelConvertConfig)
-                .build();
+        FrameworkConfig frameworkConfig = tableEnv.frameworkConfig();
 
+        FeaturePlanner planner = new FeaturePlanner(frameworkConfig, tableEnv.getPlanner(), tableEnv.getTypeFactory());
 
         // step1: 解析构建抽象语法树(AST)
-        SqlParser parser = SqlParser.create(sql, frameworkConfig.getParserConfig());
-        SqlNode sqlNode = parser.parseStmt();
-
-        FeatureRelBuilder relBuilder = CalciteSqlUtils.createRelBuilder(frameworkConfig);
+        SqlNode sqlNode = planner.parse(sql);
 
         // step2: 校验(表名, 字段)
-        CalciteCatalogReader catalogReader = CalciteSqlUtils.createCatalogReader(
-                defaultSchema, relBuilder.getTypeFactory(), frameworkConfig.getParserConfig());
-        SqlValidatorImpl sqlValidator = new FeatureSqlValidator(frameworkConfig.getOperatorTable(),
-                catalogReader, relBuilder.getTypeFactory());
-        SqlNode validateSqlNode = sqlValidator.validate(sqlNode);
+        SqlNode validateSqlNode = planner.validate(sqlNode);
 
         // step3: 语义分析(SqlNode -> RelNode)
-        RexBuilder rexBuilder = new RexBuilder(relBuilder.getTypeFactory());
-        RelOptCluster cluster = CalciteSqlUtils.createRelOptCluster(relBuilder.getPlaner(), rexBuilder);
-        SqlToRelConverter sqlToRelConverter = new SqlToRelConverter(
-                new SimpleViewExpander(), sqlValidator, catalogReader, cluster, frameworkConfig.getConvertletTable(),
-                frameworkConfig.getSqlToRelConverterConfig());
-
-        RelRoot root = sqlToRelConverter.convertQuery(validateSqlNode, false, true);
+        RelRoot root = planner.rel(validateSqlNode);
 
         System.out.println(RelOptUtil.toString(root.rel, SqlExplainLevel.NON_COST_ATTRIBUTES));
 
