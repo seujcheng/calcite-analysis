@@ -1,41 +1,24 @@
 package com.sdu.calcite;
 
-import org.apache.calcite.config.Lex;
-import org.apache.calcite.jdbc.CalciteSchema;
-import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptTable;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.plan.hep.HepMatchOrder;
 import org.apache.calcite.plan.hep.HepPlanner;
 import org.apache.calcite.plan.hep.HepProgramBuilder;
-import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.type.RelDataType;
-import org.apache.calcite.rel.type.RelDataTypeSystem;
-import org.apache.calcite.rex.RexBuilder;
-import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.fun.SqlStdOperatorTable;
-import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.calcite.sql.validate.SqlValidatorImpl;
-import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
-import org.apache.calcite.tools.Frameworks;
 
 import com.sdu.calcite.plan.FeaturePlanner;
-import com.sdu.calcite.plan.FeatureRelBuilder;
-import com.sdu.calcite.plan.FeatureSqlValidator;
 import com.sdu.calcite.plan.FeatureTableEnvironment;
 import com.sdu.calcite.plan.rules.FeatureTableScanRule;
 import com.sdu.calcite.plan.rules.PushProjectIntoTableScanRule;
 import com.sdu.calcite.table.FeatureTable;
-import com.sdu.calcite.utils.CalciteSqlUtils;
 
 import java.util.List;
-
-import static java.lang.Integer.MAX_VALUE;
 
 /**
  * @author hanhan.zhang
