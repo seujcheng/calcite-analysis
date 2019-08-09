@@ -5,11 +5,14 @@ import org.apache.calcite.config.CalciteConnectionConfigImpl;
 import org.apache.calcite.config.CalciteConnectionProperty;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
-import org.apache.calcite.plan.ConventionTraitDef;
-import org.apache.calcite.plan.RelOptCluster;
-import org.apache.calcite.plan.RelOptPlanner;
+import org.apache.calcite.plan.*;
+import org.apache.calcite.plan.hep.HepMatchOrder;
+import org.apache.calcite.plan.hep.HepPlanner;
+import org.apache.calcite.plan.hep.HepProgram;
+import org.apache.calcite.plan.hep.HepProgramBuilder;
 import org.apache.calcite.plan.volcano.VolcanoPlanner;
 import org.apache.calcite.prepare.CalciteCatalogReader;
+import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rex.RexBuilder;
@@ -18,8 +21,10 @@ import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.RelBuilder;
+import org.apache.calcite.tools.RuleSet;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -79,6 +84,29 @@ public class CalciteSqlUtils {
 
         return new FeatureRelBuilder(frameworkConfig.getContext(), cluster, relOptSchema);
 
+    }
+
+    public static RelNode runHepPlannerSequentially(
+            HepMatchOrder hepMatchOrder, RuleSet ruleSet, RelNode input, RelTraitSet targetTraits, Context context) {
+
+        HepProgramBuilder builder = new HepProgramBuilder();
+        builder.addMatchOrder(hepMatchOrder);
+
+        Iterator<RelOptRule> it = ruleSet.iterator();
+        while (it.hasNext()) {
+            builder.addRuleInstance(it.next());
+        }
+
+        return runHepPlanner(builder.build(), input, targetTraits, context);
+    }
+
+    private static RelNode runHepPlanner(HepProgram hepProgram, RelNode input, RelTraitSet targetTraits, Context cxt) {
+        HepPlanner planner = new HepPlanner(hepProgram, cxt);
+        planner.setRoot(input);
+        if (input.getTraitSet() != targetTraits) {
+            planner.changeTraits(input, targetTraits.simplify());
+        }
+        return planner.findBestExp();
     }
 
 }

@@ -1,8 +1,14 @@
 package com.sdu.calcite;
 
+import com.sdu.calcite.feature.fetcher.FeatureGetter;
+import com.sdu.calcite.plan.FeaturePlanner;
+import com.sdu.calcite.plan.FeatureRel;
+import com.sdu.calcite.plan.FeatureTableEnvironment;
+import com.sdu.calcite.plan.rules.FeatureTableScanRule;
+import com.sdu.calcite.table.FeatureTable;
+import com.sdu.calcite.utils.CalciteSqlUtils;
 import org.apache.calcite.plan.RelOptTable;
 import org.apache.calcite.plan.RelOptUtil;
-import org.apache.calcite.plan.hep.HepMatchOrder;
 import org.apache.calcite.plan.hep.HepPlanner;
 import org.apache.calcite.plan.hep.HepProgramBuilder;
 import org.apache.calcite.rel.RelNode;
@@ -12,13 +18,10 @@ import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.tools.FrameworkConfig;
 
-import com.sdu.calcite.plan.FeaturePlanner;
-import com.sdu.calcite.plan.FeatureTableEnvironment;
-import com.sdu.calcite.plan.rules.FeatureTableScanRule;
-import com.sdu.calcite.plan.rules.PushProjectIntoTableScanRule;
-import com.sdu.calcite.table.FeatureTable;
-
 import java.util.List;
+
+import static com.sdu.calcite.plan.rules.FeatureRuleSets.LOGICAL_OPT_RULES;
+import static org.apache.calcite.plan.hep.HepMatchOrder.TOP_DOWN;
 
 /**
  * @author hanhan.zhang
@@ -83,15 +86,22 @@ public class CalciteBootstrap {
         //     MatchOrder则表示每次rule执行的顺序: ARBITRARY、BOTTOM_UP、TOP_DOWN三种方式, 其中ARBITRARY被认为是最高效的apply方式
         HepProgramBuilder programBuilder = new HepProgramBuilder()
                 .addRuleInstance(FeatureTableScanRule.INSTANCE)
-                // 先转为FeatureTableScan, '谓词下推'
-                .addRuleInstance(PushProjectIntoTableScanRule.INSTANCE)
                 .addMatchLimit(10)
-                .addMatchOrder(HepMatchOrder.TOP_DOWN);
+                .addMatchOrder(TOP_DOWN);
         HepPlanner hepPlanner = new HepPlanner(programBuilder.build(), frameworkConfig.getContext());
         hepPlanner.setRoot(root.rel);
         RelNode optimizeRelNode = hepPlanner.findBestExp();
 
-        System.out.println(RelOptUtil.toString(optimizeRelNode, SqlExplainLevel.NON_COST_ATTRIBUTES));
+        // LogicalFilter/LogicalProject ==> LogicalCalc
+        RelNode normalizedPlan = CalciteSqlUtils.runHepPlannerSequentially(TOP_DOWN, LOGICAL_OPT_RULES,
+                optimizeRelNode, optimizeRelNode.getTraitSet(), frameworkConfig.getContext());
+
+        System.out.println(RelOptUtil.toString(normalizedPlan, SqlExplainLevel.NON_COST_ATTRIBUTES));
+
+
+        //
+        FeatureGetter featureGetter = ((FeatureRel) normalizedPlan).translateToFeatureGetter();
+
     }
 
 }

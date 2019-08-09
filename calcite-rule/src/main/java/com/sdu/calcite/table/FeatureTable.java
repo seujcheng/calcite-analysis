@@ -13,9 +13,9 @@ public class FeatureTable extends InlineTable {
     @Override
     public RelDataType getRowType(RelDataTypeFactory typeFactory) {
         RelDataTypeFactory.Builder builder = typeFactory.builder();
-        for (int i = 0; i < columnNames.length; ++i) {
-            String name = columnNames[i];
-            SqlTypeName typeName = columnTypes[i];
+        for (int i = 0; i < getColumnNames().length; ++i) {
+            String name = getColumnNames()[i];
+            SqlTypeName typeName = getColumnTypes()[i];
             builder.add(name, typeName);
         }
         return builder.build();

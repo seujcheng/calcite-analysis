@@ -1,29 +1,34 @@
 package com.sdu.calcite.table;
 
+import com.google.common.base.Preconditions;
 import org.apache.calcite.schema.impl.AbstractTable;
 import org.apache.calcite.sql.type.SqlTypeName;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author hanhan.zhang
  * */
 abstract class InlineTable extends AbstractTable {
 
-    protected final String[] columnNames;
-    protected final SqlTypeName[] columnTypes;
+    private final String[] columnNames;
+    private final SqlTypeName[] columnTypes;
 
     InlineTable(String[] columnNames, Class<?>[] columnTypes) {
-        if (columnNames == null || columnNames.length == 0) {
-            throw new IllegalArgumentException("Table column empty.");
-        }
-        if (columnTypes == null || columnTypes.length == 0) {
-            throw new IllegalArgumentException("Table column type empty.");
-        }
-        if (columnNames.length != columnTypes.length) {
-            throw new IllegalArgumentException("Table column and type length is not same.");
-        }
+        Preconditions.checkArgument(ArrayUtils.isNotEmpty(columnNames));
+        Preconditions.checkArgument(ArrayUtils.isNotEmpty(columnTypes));
+        Preconditions.checkState(columnNames.length == columnTypes.length);
 
         this.columnNames = columnNames;
         this.columnTypes = convertToSqlTypes(columnTypes);
+    }
+
+    public String[] getColumnNames() {
+        return columnNames;
+    }
+
+    public SqlTypeName[] getColumnTypes() {
+        return columnTypes;
     }
 
     private static SqlTypeName[] convertToSqlTypes(Class<?>[] columnTypes) {

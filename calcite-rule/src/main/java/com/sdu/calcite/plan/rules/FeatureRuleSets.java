@@ -29,7 +29,9 @@ public class FeatureRuleSets {
       ProjectCalcMergeRule.INSTANCE,
       FilterToCalcRule.INSTANCE,
       ProjectToCalcRule.INSTANCE,
-      CalcMergeRule.INSTANCE
+      CalcMergeRule.INSTANCE,
+
+      LogicalCalcConverter.INSTANCE
 
   );
 
