@@ -56,29 +56,29 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.0.2</version>
-                <executions>
-                    <!-- Extract parser grammar template from calcite-core.jar and put
-                      it under ${project.build.directory}/codegen/templates/ where all freemarker templates are. -->
-                    <execution>
-                        <id>unpack-parser-template</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.apache.calcite</groupId>
-                                    <artifactId>calcite-core</artifactId>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/</outputDirectory>
-                                    <includes>codegen/templates/Parser.jj</includes>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
+                <!--<executions>-->
+                    <!--&lt;!&ndash; Extract parser grammar template from calcite-core.jar and put-->
+                      <!--it under ${project.build.directory}/codegen/templates/ where all freemarker templates are. &ndash;&gt;-->
+                    <!--<execution>-->
+                        <!--<id>unpack-parser-template</id>-->
+                        <!--<phase>initialize</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>unpack</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<artifactItems>-->
+                                <!--<artifactItem>-->
+                                    <!--<groupId>org.apache.calcite</groupId>-->
+                                    <!--<artifactId>calcite-core</artifactId>-->
+                                    <!--<type>jar</type>-->
+                                    <!--<overWrite>true</overWrite>-->
+                                    <!--<outputDirectory>${project.build.directory}/</outputDirectory>-->
+                                    <!--<includes>codegen/templates/Parser.jj</includes>-->
+                                <!--</artifactItem>-->
+                            <!--</artifactItems>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+                <!--</executions>-->
             </plugin>
 
             <plugin>
