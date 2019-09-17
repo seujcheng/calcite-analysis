@@ -82,8 +82,8 @@ public class SqlCreateFunction extends SqlCreate {
     }
     Map<String, String> props = new HashMap<>();
     for (SqlNode node : properties) {
-      SqlPropertyNode propertyNode = (SqlPropertyNode) node;
-      props.put(propertyNode.getPropertyName(), propertyNode.getPropertyValue());
+      SqlPropertyOption propertyNode = (SqlPropertyOption) node;
+      props.put(propertyNode.getKeyString(), propertyNode.getValueString());
     }
     return props;
   }

@@ -31,11 +31,11 @@ data: {
 
       # List of keywords(扩展关键字).
       keywords: [
+        "COMMENT",
         "VIRTUAL",
         "STORED",
         "IF",
-        "USE",
-        "JOB"
+        "USE"
       ]
 
       # List of keywords from "keywords" section that are not reserved.
@@ -43,8 +43,7 @@ data: {
         "VIRTUAL",
         "STORED",
         "IF",
-        "USE",
-        "JOB"
+        "USE"
       ]
 
       # List of additional join types. Each is a method with no arguments.
@@ -54,8 +53,7 @@ data: {
 
       # List of methods for parsing custom SQL statements(扩展自定义SQL解析函数).
       statementParserMethods: [
-        "SqlUseFunction()",
-        "SqlJobDefine()"
+        "SqlUseFunction()"
       ]
 
       # List of methods for parsing custom literals.

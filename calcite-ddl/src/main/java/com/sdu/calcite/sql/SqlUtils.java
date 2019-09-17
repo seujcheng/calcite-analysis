@@ -26,4 +26,11 @@ public class SqlUtils {
         writer.endList(frame);
     }
 
+    // 写缩进
+    public static void printIndent(SqlWriter writer) {
+        writer.sep(",", false);
+        writer.newlineAndIndent();
+        writer.print("  ");
+    }
+
 }

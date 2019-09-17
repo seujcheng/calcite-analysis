@@ -1,13 +1,12 @@
 package com.sdu.calcite.sql.parser;
 
+import java.io.Reader;
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.parser.SqlAbstractParserImpl;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserImplFactory;
-
-import java.io.Reader;
 
 /**
  * @author hanhan.zhang
@@ -45,4 +44,5 @@ public class XSqlParser {
     public static SqlNode parseOne(String text) throws Exception {
         return parse(text).get(0);
     }
+
 }

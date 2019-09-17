@@ -15,239 +15,127 @@
 // limitations under the License.
 -->
 
-boolean IfNotExistsOpt() :
-{
-}
-{
-    <IF> <NOT> <EXISTS> { return true; }
-|
-    { return false; }
-}
-
-boolean IfExistsOpt() :
-{
-}
-{
-    <IF> <EXISTS> { return true; }
-|
-    { return false; }
-}
-
-SqlNodeList Options() :
-{
-    final Span s;
-    final List<SqlNode> list = new ArrayList<SqlNode>();
-}
-{
-    <OPTIONS> { s = span(); } <LPAREN>
-    [
-        Option(list)
-        (
-            <COMMA>
-            Option(list)
-        )*
-    ]
-    <RPAREN> {
-        return new SqlNodeList(list, s.end(this));
-    }
-}
-
-void Option(List<SqlNode> list) :
-{
-    final SqlIdentifier id;
-    final SqlNode value;
-}
-{
-    id = SimpleIdentifier()
-    value = Literal() {
-        list.add(id);
-        list.add(value);
-    }
-}
-
-SqlNodeList TableElementList() :
-{
-    final Span s;
-    final List<SqlNode> list = new ArrayList<SqlNode>();
-}
-{
-    <LPAREN> { s = span(); }
-    TableElement(list)
-    (
-        <COMMA> TableElement(list)
-    )*
-    <RPAREN> {
-        return new SqlNodeList(list, s.end(this));
-    }
-}
-
 /**
 (name = value [, name = value]*)
 LPAREN: 左括号
 COMMA: 逗号
 RPAREN: 右括号
 **/
-SqlNodeList DefineProperties() :
+SqlNodeList SqlProperties() :
 {
-    final Span s = Span.of();
+    SqlNode property;
     final List<SqlNode> list = new ArrayList<SqlNode>();
+    final Span span;
 }
 {
     <LPAREN>
     {
-        s.add(this);
+        span = span();
     }
-    PropertyDef(list)
-    (
-        <COMMA> PropertyDef(list)
-    )*
+    [
+        property = SqlPropertyOption()
+        {
+            list.add(property);
+        }
+        (
+            <COMMA> property = SqlPropertyOption()
+            {
+                list.add(property);
+            }
+        )*
+    ]
     <RPAREN>
     {
-        return new SqlNodeList(list, s.end(this));
+        return new SqlNodeList(list, span.end(this));
     }
 }
 
 /**
 name = value
 **/
-void PropertyDef(List<SqlNode> list) :
+SqlNode SqlPropertyOption() :
 {
-    final Span s = Span.of();
-    final SqlIdentifier name;
-    final SqlNode val;
+    SqlNode key;
+    SqlNode value;
+    SqlParserPos pos;
 }
 {
-    name = SimpleIdentifier() { s.add(this); }
+    key = StringLiteral()
+    { pos = getPos(); }
     <EQ>
-    val = Literal()
+    value = StringLiteral()
     {
-        list.add(new SqlPropertyNode(s.end(val), name, val));
+        return new SqlPropertyOption(getPos(), key, value);
     }
 }
 
-void KeyWithProperties(Map<String, SqlNodeList> jobConf) :
+void TableColumn(List<SqlNode> list) :
 {
-   final SqlIdentifier name;
-   final SqlNodeList properties;
+   SqlParserPos pos;
+   SqlIdentifier name;
+   SqlDataTypeSpec type;
+   SqlCharStringLiteral comment = null;
 }
 {
-   name = SimpleIdentifier()
-   <WITH>
-      properties = DefineProperties()
-   {
-       jobConf.put(name.toString(), properties);
-   }
-}
-
-/**
-key WITH (name = value [, name = value]*) [, key WITH (name = value [, name = value]*)]*
-**/
-Map<String, SqlNodeList> KeyWithMultiProperties() :
-{
-  final Map<String, SqlNodeList> keyProperties = new HashMap<String, SqlNodeList>();
-}
-{
-   KeyWithProperties(keyProperties)
-   (
-       <COMMA> KeyWithProperties(keyProperties)
-   )*
-   {
-      return keyProperties;
-   }
-}
-
-void TableElement(List<SqlNode> list) :
-{
-    final SqlIdentifier id;
-    final SqlDataTypeSpec type;
-    final boolean nullable;
-    final SqlNode e;
-    final SqlNode constraint;
-    SqlIdentifier name = null;
-    final SqlNodeList columnList;
-    final Span s = Span.of();
-    final ColumnStrategy strategy;
-}
-{
-    LOOKAHEAD(2) id = SimpleIdentifier()
-    (
-        type = DataType()
-        (
-            <NULL> { nullable = true; }
-        |
-            <NOT> <NULL> { nullable = false; }
-        |
-            { nullable = true; }
-        )
-        (
-            [ <GENERATED> <ALWAYS> ] <AS> <LPAREN>
-            e = Expression(ExprContext.ACCEPT_SUB_QUERY) <RPAREN>
-            (
-                <VIRTUAL> { strategy = ColumnStrategy.VIRTUAL; }
-            |
-                <STORED> { strategy = ColumnStrategy.STORED; }
-            |
-                { strategy = ColumnStrategy.VIRTUAL; }
-            )
-        |
-            <DEFAULT_> e = Expression(ExprContext.ACCEPT_SUB_QUERY) {
-                strategy = ColumnStrategy.DEFAULT;
-            }
-        |
-            {
-                e = null;
-                strategy = nullable ? ColumnStrategy.NULLABLE
-                    : ColumnStrategy.NOT_NULLABLE;
-            }
-        )
-        {
-            list.add(
-                SqlDdlNodes.column(s.add(id).end(this), id,
-                    type.withNullable(nullable), e, strategy));
-        }
-    |
-        { list.add(id); }
-    )
-|
-    id = SimpleIdentifier() {
-        list.add(id);
+    name = SimpleIdentifier()
+    type = DataType()
+    [ <COMMENT> <QUOTED_STRING> {
+        String p = SqlParserUtil.parseString(token.image);
+        comment = SqlLiteral.createCharString(p, getPos());
+    }]
+    {
+        SqlTableColumn column = new SqlTableColumn(getPos(), name, type, comment);
+        list.add(column);
     }
-|
-    [ <CONSTRAINT> { s.add(this); } name = SimpleIdentifier() ]
-    (
-        <CHECK> { s.add(this); } <LPAREN>
-        e = Expression(ExprContext.ACCEPT_SUB_QUERY) <RPAREN> {
-            list.add(SqlDdlNodes.check(s.end(this), name, e));
-        }
-    |
-        <UNIQUE> { s.add(this); }
-        columnList = ParenthesizedSimpleIdentifierList() {
-            list.add(SqlDdlNodes.unique(s.end(columnList), name, columnList));
-        }
-    |
-        <PRIMARY>  { s.add(this); } <KEY>
-        columnList = ParenthesizedSimpleIdentifierList() {
-            list.add(SqlDdlNodes.primary(s.end(columnList), name, columnList));
-        }
-    )
 }
 
 SqlCreate SqlCreateTable(Span s, boolean replace) :
 {
-    final boolean ifNotExists;
-    final SqlIdentifier id;
-    SqlNodeList tableElementList = null;
-    SqlNodeList tableDescriptor = null;
-    SqlNode query = null;
+    final SqlParserPos startPos = s.pos();
+    SqlIdentifier tableName;
+    SqlNodeList columnList = SqlNodeList.EMPTY;
+    SqlNodeList tableProps = SqlNodeList.EMPTY;
+    SqlCharStringLiteral comment = null;
+
+    SqlParserPos pos = startPos;
 }
 {
-    <TABLE> ifNotExists = IfNotExistsOpt() id = CompoundIdentifier()
-    [ tableElementList = TableElementList() ]
-    [ <AS> query = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY) ]
-    [<WITH> tableDescriptor = DefineProperties() ]
+    <TABLE>
+
+    // 解析表名
+    tableName = CompoundIdentifier()
+
+    // 解析列
+    [
+        <LPAREN>
+            { pos = getPos(); List<SqlNode> columns = new ArrayList<SqlNode>();}
+            TableColumn(columns)
+            (
+                <COMMA> TableColumn(columns)
+            )*
+        <RPAREN>
+        {
+            pos = pos.plus(getPos());
+            columnList = new SqlNodeList(columns, pos);
+        }
+    ]
+
+    // 解析表注释
+    [
+        <COMMENT> <QUOTED_STRING> {
+            String p = SqlParserUtil.parseString(token.image);
+            comment = SqlLiteral.createCharString(p, getPos());
+        }
+    ]
+
+    // 解析表属性
+    [
+        <WITH>
+        tableProps = SqlProperties()
+    ]
+
     {
-        return new SqlCreateTable(s.end(this), replace, ifNotExists,
-                id, tableElementList, tableDescriptor, null);
+        return new SqlCreateTable(startPos.plus(getPos()), tableName, columnList, tableProps, comment);
     }
 }
 
@@ -265,7 +153,7 @@ SqlCreate SqlCreateFunction(Span s, boolean replace) :
         name = SimpleIdentifier()
     <AS>
         className = StringLiteral()
-    [ <WITH> properties = DefineProperties() ]
+    [ <WITH> properties = SqlProperties() ]
     {
         return new SqlCreateFunction(s.end(this), name, className, properties);
     }
@@ -286,27 +174,9 @@ SqlCall SqlUseFunction() :
         name = SimpleIdentifier()
     <AS>
         className = StringLiteral()
-    [ <WITH> properties = DefineProperties() ]
+    [ <WITH> properties = SqlProperties() ]
     {
         return new SqlUseFunction(s.end(this), name, className, properties);
-    }
-}
-
-/**
-DEFINE JOB job_name SET key WITH (name = value [, name = value]*) [, key WITH (name = value [, name = value]*)]
-**/
-SqlCall SqlJobDefine() :
-{
-   final Span s = Span.of();
-   final SqlIdentifier name;
-   Map<String, SqlNodeList> jobConf = null;
-}
-{
-    <DEFINE> <JOB>
-        name = SimpleIdentifier()
-    [ <SET> jobConf = KeyWithMultiProperties() ]
-    {
-        return new SqlJobDefine(s.end(this), name, jobConf);
     }
 }
 
