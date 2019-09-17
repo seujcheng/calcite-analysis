@@ -1,52 +1,33 @@
 package com.sdu.calcite.sql.ddl.test;
 
-import com.sdu.calcite.sql.ddl.SqlCreateFunction;
-import com.sdu.calcite.sql.ddl.SqlJobDefine;
-import com.sdu.calcite.sql.ddl.SqlUseFunction;
 import com.sdu.calcite.sql.parser.XSqlParser;
+import java.io.IOException;
+import java.io.InputStream;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlNodeList;
+import org.junit.Before;
 import org.junit.Test;
 
 public class XSqlTest {
 
+    private String sqlText;
 
-    @Test
-    public void testCreateFunction() throws Exception {
-        String sql = "CREATE FUNCTION IS_IN_NYC AS 'com.sdu.sql.udf.IsInNYC' " +
-                     "WITH (" +
-                            " groupId = 'com.sdu.sql.udf'," +
-                            " artifactId = 'udf'," +
-                            " maven_version = '1.0.0')";
+    @Before
+    public void readSqlText() throws IOException {
+        InputStream stream = this.getClass().getResourceAsStream("/sql.txt");
+        byte[] content = new byte[stream.available()];
+        stream.read(content);
+        stream.close();
 
-        SqlCreateFunction sqlCreateFunction = (SqlCreateFunction) XSqlParser.parseOne(sql);
-
-        System.out.println(sqlCreateFunction.getFunctionName());
-        System.out.println(sqlCreateFunction.getFunctionClass());
-        System.out.println(sqlCreateFunction.getFunctionProperties());
+        sqlText = new String(content);
     }
 
     @Test
-    public void testUseFunction() throws Exception {
-        String sql = "USE FUNCTION IS_IN_NYC AS 'com.sdu.sql.udf.IsInNYC' " +
-                     "WITH (" +
-                     " maven_version = '1.0.0')";
-
-        SqlUseFunction sqlUseFunction = (SqlUseFunction) XSqlParser.parseOne(sql);
-
-        System.out.println(sqlUseFunction.getFunctionName());
-        System.out.println(sqlUseFunction.getFunctionClass());
-        System.out.println(sqlUseFunction.getFunctionProperties());
+    public void testSql() throws Exception {
+        SqlNodeList sqlNodes = XSqlParser.parse(sqlText);
+        for (SqlNode sqlNode : sqlNodes) {
+            System.out.println(sqlNode.toString());
+        }
     }
 
-
-    @Test
-    public void testDefineJob() throws Exception {
-        String sql = "DEFINE JOB stream_job_collector SET " +
-                     "checkpoint WITH (checkpoint_interval = 5, checkpoint_concurrent = 6), " +
-                     "recover WITH (strategy = 'NONE')";
-
-        SqlJobDefine sqlJobDefine = (SqlJobDefine) XSqlParser.parseOne(sql);
-        System.out.println(sqlJobDefine.getJobName());
-        System.out.println(sqlJobDefine.getProperties("checkpoint"));
-        System.out.println(sqlJobDefine.getProperties("recover"));
-    }
 }
