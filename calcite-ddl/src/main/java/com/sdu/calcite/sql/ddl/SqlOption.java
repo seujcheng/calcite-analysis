@@ -16,14 +16,14 @@ import org.apache.calcite.util.NlsString;
  *
  * @author hanhan.zhang
  * */
-public class SqlPropertyOption extends SqlCall {
+public class SqlOption extends SqlCall {
 
     private static final SqlOperator OPERATOR = new SqlSpecialOperator("SQL_PROPERTY", SqlKind.ATTRIBUTE_DEF);
 
     private final SqlNode key;
     private final SqlNode value;
 
-    public SqlPropertyOption(SqlParserPos pos, SqlNode key, SqlNode value) {
+    public SqlOption(SqlParserPos pos, SqlNode key, SqlNode value) {
         super(pos);
         this.key = key;
         this.value = value;

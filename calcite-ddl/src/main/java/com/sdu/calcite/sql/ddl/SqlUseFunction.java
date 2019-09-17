@@ -75,7 +75,7 @@ public class SqlUseFunction extends SqlDdl {
 
     Map<String, String> props = new HashMap<>();
     for (SqlNode node : funcProps) {
-      SqlPropertyOption propertyNode = (SqlPropertyOption) node;
+      SqlOption propertyNode = (SqlOption) node;
       props.put(propertyNode.getKeyString(), propertyNode.getValueString());
     }
 

@@ -21,7 +21,7 @@ LPAREN: 左括号
 COMMA: 逗号
 RPAREN: 右括号
 **/
-SqlNodeList SqlProperties() :
+SqlNodeList SqlOptions() :
 {
     SqlNode property;
     final List<SqlNode> list = new ArrayList<SqlNode>();
@@ -33,12 +33,12 @@ SqlNodeList SqlProperties() :
         span = span();
     }
     [
-        property = SqlPropertyOption()
+        property = SqlOption()
         {
             list.add(property);
         }
         (
-            <COMMA> property = SqlPropertyOption()
+            <COMMA> property = SqlOption()
             {
                 list.add(property);
             }
@@ -53,7 +53,7 @@ SqlNodeList SqlProperties() :
 /**
 name = value
 **/
-SqlNode SqlPropertyOption() :
+SqlNode SqlOption() :
 {
     SqlNode key;
     SqlNode value;
@@ -65,7 +65,7 @@ SqlNode SqlPropertyOption() :
     <EQ>
     value = StringLiteral()
     {
-        return new SqlPropertyOption(getPos(), key, value);
+        return new SqlOption(getPos(), key, value);
     }
 }
 
@@ -131,7 +131,7 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
     // 解析表属性
     [
         <WITH>
-        tableProps = SqlProperties()
+        tableProps = SqlOptions()
     ]
 
     {
@@ -153,7 +153,7 @@ SqlCreate SqlCreateFunction(Span s, boolean replace) :
         name = SimpleIdentifier()
     <AS>
         className = StringLiteral()
-    [ <WITH> properties = SqlProperties() ]
+    [ <WITH> properties = SqlOptions() ]
     {
         return new SqlCreateFunction(s.end(this), name, className, properties);
     }
@@ -174,7 +174,7 @@ SqlCall SqlUseFunction() :
         name = SimpleIdentifier()
     <AS>
         className = StringLiteral()
-    [ <WITH> properties = SqlProperties() ]
+    [ <WITH> properties = SqlOptions() ]
     {
         return new SqlUseFunction(s.end(this), name, className, properties);
     }
