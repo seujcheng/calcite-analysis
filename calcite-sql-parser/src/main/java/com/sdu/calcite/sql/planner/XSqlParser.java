@@ -1,5 +1,6 @@
-package com.sdu.calcite.sql.parser;
+package com.sdu.calcite.sql.planner;
 
+import com.sdu.calcite.sql.parser.XSqlParserImpl;
 import java.io.Reader;
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.sql.SqlNode;
@@ -37,12 +38,13 @@ public class XSqlParser {
     }
 
     public static SqlNodeList parse(String text) throws Exception {
-        SqlParser sqlParser = SqlParser.create(text, config);
-        return sqlParser.parseStmtList();
+        SqlParser parser = SqlParser.create(text, config);
+        return parser.parseStmtList();
     }
 
     public static SqlNode parseOne(String text) throws Exception {
-        return parse(text).get(0);
+        SqlParser parser = SqlParser.create(text, config);
+        return parser.parseQuery(text);
     }
 
 }
