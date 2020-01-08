@@ -11,8 +11,8 @@
 
     <modules>
         <module>calcite-sql-ddl</module>
-        <module>calcite-rule</module>
         <module>calcite-sql-parser</module>
+        <module>calcite-sql-planner</module>
     </modules>
 
     <properties>
