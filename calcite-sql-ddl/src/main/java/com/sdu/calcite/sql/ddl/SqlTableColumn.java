@@ -2,6 +2,8 @@ package com.sdu.calcite.sql.ddl;
 
 import java.util.List;
 import javax.annotation.Nonnull;
+import org.apache.calcite.rel.type.RelDataType;
+import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlCharStringLiteral;
 import org.apache.calcite.sql.SqlDataTypeSpec;
@@ -27,6 +29,18 @@ public class SqlTableColumn extends SqlCall {
     this.name = name;
     this.type = type;
     this.comment = comment;
+  }
+
+  public String getName() {
+    return name.getSimple();
+  }
+
+  public String getComment() {
+    return comment.getNlsString().getValue();
+  }
+
+  public RelDataType getType(RelDataTypeFactory typeFactory) {
+    return type.deriveType(typeFactory);
   }
 
   @Nonnull

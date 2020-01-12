@@ -1,10 +1,15 @@
-package com.sdu.calcite.sql.type;
+package com.sdu.calcite.sql;
 
 import java.nio.charset.Charset;
 import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
+import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.util.ConversionUtil;
 
 public class XTypeFactory extends JavaTypeFactoryImpl {
+
+  public XTypeFactory(RelDataTypeSystem typeSystem) {
+    super(typeSystem);
+  }
 
   @Override
   public Charset getDefaultCharset() {

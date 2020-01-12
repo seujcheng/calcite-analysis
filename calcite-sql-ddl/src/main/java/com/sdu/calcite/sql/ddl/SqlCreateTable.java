@@ -47,6 +47,14 @@ public class SqlCreateTable extends SqlCreate  {
         this.comment = comment;
     }
 
+    public String getTableName() {
+        return tableName.getSimple();
+    }
+
+    public SqlNodeList getColumnList() {
+        return columnList;
+    }
+
     @Override
     public List<SqlNode> getOperandList() {
         return ImmutableNullableList.of(tableName, columnList, tableProps, comment);
@@ -93,8 +101,5 @@ public class SqlCreateTable extends SqlCreate  {
             writer.endList(withFrame);
         }
     }
-
-
-
 
 }
