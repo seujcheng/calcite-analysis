@@ -12,6 +12,7 @@ import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.validate.SqlConformance;
 import org.apache.calcite.sql.validate.SqlValidatorCatalogReader;
 import org.apache.calcite.sql.validate.SqlValidatorImpl;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
 
 public class XCalciteSqlValidator extends SqlValidatorImpl {
 
@@ -27,21 +28,21 @@ public class XCalciteSqlValidator extends SqlValidatorImpl {
       return nodePaths;
     }
 
-    if (select.getGroup() == null) {
-      // FROM
-      SqlNode from = select.getFrom();
-      if (from.getKind() == SqlKind.SELECT) {
-        Set<XNodePath> subNodePaths = getAggregateNodePaths((SqlSelect) from);
-        if (subNodePaths != null && !subNodePaths.isEmpty()) {
-          nodePaths.addAll(subNodePaths);
-        }
-        return nodePaths;
+    if (select.getGroup() != null) {
+      SqlNodeList groupNode = select.getGroup();
+      final SqlValidatorScope groupScope = getGroupScope(select);
+
+    }
+
+    // FROM
+    SqlNode from = select.getFrom();
+    if (from.getKind() == SqlKind.SELECT) {
+      Set<XNodePath> subNodePaths = getAggregateNodePaths((SqlSelect) from);
+      if (subNodePaths != null && !subNodePaths.isEmpty()) {
+        nodePaths.addAll(subNodePaths);
       }
     }
 
-    SqlNodeList groupNode = select.getGroup();
-
-    // TODO: 2020-01-10
     return nodePaths;
   }
 

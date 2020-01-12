@@ -7,15 +7,18 @@ import com.sdu.calcite.sql.ddl.SqlCreateTable;
 import com.sdu.calcite.sql.ddl.SqlUseFunction;
 import com.sdu.calcite.sql.planner.XSqlParser;
 import com.sdu.calcite.sql.planner.XSqlPlanner;
+import com.sdu.calcite.sql.table.XNodePath;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.sql.SqlInsert;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlSelect;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -68,6 +71,9 @@ public class XSqlParserTest {
     XSqlPlanner planner = XCalciteUtils.createXSqlPlanner(createTables, functions);
     RelRoot relRoot = planner.validateAndRel(select);
 
+    Set<XNodePath> groupNodes = planner.getGroupNodeMeta((SqlSelect) select);
+
+    System.out.println(groupNodes);
     System.out.println(RelOptUtil.toString(relRoot.rel));
   }
 
