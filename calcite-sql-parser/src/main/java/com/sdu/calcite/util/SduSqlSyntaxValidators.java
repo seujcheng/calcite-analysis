@@ -1,14 +1,13 @@
-package com.sdu.calcite.sql;
+package com.sdu.calcite.util;
 
-import com.sdu.calcite.sql.ddl.SqlCreateTable;
-import com.sdu.calcite.sql.ddl.SqlTableColumn;
-import com.sdu.calcite.sql.ddl.SqlUseFunction;
-import com.sdu.calcite.sql.planner.XSqlParserImplFactory;
-import com.sdu.calcite.sql.planner.XSqlPlanner;
-import com.sdu.calcite.sql.table.XTable;
-import com.sdu.calcite.sql.table.XTableColumn;
+import com.sdu.calcite.entry.SduFunction;
+import com.sdu.calcite.entry.SduSqlStatement;
+import com.sdu.calcite.parser.SduCalciteSqlPlanner;
+import com.sdu.calcite.parser.SduRelBuilder;
+import com.sdu.calcite.parser.SduSqlParserImplFactory;
+import com.sdu.calcite.schema.SduCalciteTable;
+import com.sdu.calcite.types.SduTypeFactory;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import org.apache.calcite.avatica.util.Casing;
@@ -21,9 +20,7 @@ import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.volcano.VolcanoPlanner;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
-import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rex.RexBuilder;
-import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.util.ChainedSqlOperatorTable;
@@ -31,31 +28,23 @@ import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 
-public class XCalciteUtils {
+public class SduSqlSyntaxValidators {
 
-  private XCalciteUtils() {
+  private SduSqlSyntaxValidators() {
 
   }
 
-  private static CalciteSchema createCalciteSchema(List<SqlCreateTable> createTables, RelDataTypeFactory typeFactory) {
+  private static CalciteSchema createCalciteSchema(List<com.sdu.calcite.entry.SduTable> tables) {
     CalciteSchema schema = CalciteSchema.createRootSchema(false, false);
-
-    for (SqlCreateTable table : createTables) {
-      List<XTableColumn> columns = new LinkedList<>();
-      for (SqlNode column : table.getColumnList()) {
-        SqlTableColumn c = (SqlTableColumn) column;
-        columns.add(new XTableColumn(c.getName(), c.getType(typeFactory).getSqlTypeName(),
-            c.getComment()));
-      }
-      schema.add(table.getTableName(), new XTable(columns));
+    for (com.sdu.calcite.entry.SduTable table : tables) {
+      schema.add(table.getName(), new SduCalciteTable(table.getColumns(), table.getProperties()));
     }
-
     return schema;
   }
 
-  private static SqlOperatorTable createSqlOperatorTable(XTypeFactory typeFactory, List<SqlUseFunction> functions) {
-    return ChainedSqlOperatorTable.of(new XBasicOperatorTable(),
-        new XUserFunctionOperatorTable(typeFactory, functions));
+  private static SqlOperatorTable createSqlOperatorTable(SduTypeFactory typeFactory, List<SduFunction> functions) {
+    return ChainedSqlOperatorTable.of(new SduBasicOperatorTable(),
+        new SduFunctionOperatorTable(typeFactory, functions));
   }
 
 
@@ -63,7 +52,7 @@ public class XCalciteUtils {
     return SqlParser.configBuilder()
         // 禁止转为大写
         .setUnquotedCasing(Casing.UNCHANGED)
-        .setParserFactory(new XSqlParserImplFactory())
+        .setParserFactory(new SduSqlParserImplFactory())
         .setLex(Lex.JAVA)
         .build();
   }
@@ -77,12 +66,11 @@ public class XCalciteUtils {
         .build();
   }
 
-  private static FrameworkConfig createFrameworkConfig(XTypeFactory typeFactory,
-      List<SqlCreateTable> createTables, List<SqlUseFunction> functions) {
+  private static FrameworkConfig createFrameworkConfig(SduTypeFactory typeFactory, SduSqlStatement sqlStatement) {
     // register table schema
-    CalciteSchema schema = createCalciteSchema(createTables, typeFactory);
+    CalciteSchema schema = createCalciteSchema(sqlStatement.getTables());
     // register function schema
-    SqlOperatorTable operatorTable = createSqlOperatorTable(typeFactory, functions);
+    SqlOperatorTable operatorTable = createSqlOperatorTable(typeFactory, sqlStatement.getFunctions());
     return Frameworks.newConfigBuilder()
         .defaultSchema(schema.plus())
         .parserConfig(createSqlParserConfig())
@@ -106,7 +94,7 @@ public class XCalciteUtils {
         rootSchema, defaultSchema, typeFactory, new CalciteConnectionConfigImpl(props));
   }
 
-  private static XRelBuilder createRelBuilder(FrameworkConfig frameworkConfig, XTypeFactory typeFactory) {
+  private static SduRelBuilder createRelBuilder(FrameworkConfig frameworkConfig, SduTypeFactory typeFactory) {
     VolcanoPlanner planner = new VolcanoPlanner();
     planner.addRelTraitDef(ConventionTraitDef.INSTANCE);
     RelOptCluster cluster = RelOptCluster.create(planner, new RexBuilder(typeFactory));
@@ -114,16 +102,16 @@ public class XCalciteUtils {
     CalciteCatalogReader relOptSchema = createCatalogReader(
         calciteSchema, Collections.emptyList(), typeFactory,
         frameworkConfig.getParserConfig());
-    return new XRelBuilder(frameworkConfig.getContext(), cluster, relOptSchema);
+    return new SduRelBuilder(frameworkConfig.getContext(), cluster, relOptSchema);
 
   }
 
-  public static XSqlPlanner createXSqlPlanner(List<SqlCreateTable> createTables, List<SqlUseFunction> functions) {
-    XTypeFactory typeFactory = new XTypeFactory(RelDataTypeSystem.DEFAULT);
-    FrameworkConfig config = createFrameworkConfig(typeFactory, createTables, functions);
-    XRelBuilder relBuilder = createRelBuilder(config, typeFactory);
+  public static SduCalciteSqlPlanner createXSqlPlanner(SduSqlStatement sqlStatement) {
+    SduTypeFactory typeFactory = new SduTypeFactory();
+    FrameworkConfig config = createFrameworkConfig(typeFactory, sqlStatement);
+    SduRelBuilder relBuilder = createRelBuilder(config, typeFactory);
 
-    return new XSqlPlanner(config, relBuilder.getPlaner(), typeFactory);
+    return new SduCalciteSqlPlanner(config, relBuilder.getPlaner(), typeFactory);
   }
 
 }

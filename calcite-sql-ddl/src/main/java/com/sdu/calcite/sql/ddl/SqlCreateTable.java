@@ -1,9 +1,7 @@
 package com.sdu.calcite.sql.ddl;
 
-import static com.sdu.calcite.sql.SqlUtils.printIndent;
 import static java.util.Objects.requireNonNull;
 
-import com.sdu.calcite.sql.SqlUtils;
 import java.util.List;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlCall;
@@ -27,37 +25,46 @@ public class SqlCreateTable extends SqlCreate  {
     private static final SqlOperator OPERATOR = new SqlSpecialOperator("CREATE TABLE", SqlKind.CREATE_TABLE);
 
     // 表名
-    private final SqlIdentifier tableName;
-
+    private final SqlIdentifier name;
     // 表列
-    private final SqlNodeList columnList;
-
+    private final SqlNodeList columns;
     // 属性
-    private final SqlNodeList tableProps;
-
+    private final SqlNodeList properties;
     // 注释
     private final SqlCharStringLiteral comment;
 
-    /** Creates a SqlCreateTable. */
-    public SqlCreateTable(SqlParserPos pos, SqlIdentifier tableName, SqlNodeList columnList, SqlNodeList tableProps, SqlCharStringLiteral comment) {
+    public SqlCreateTable(
+        SqlParserPos pos,
+        SqlIdentifier name,
+        SqlNodeList columns,
+        SqlCharStringLiteral comment,
+        SqlNodeList properties) {
         super(OPERATOR, pos, false, false);
-        this.tableName = requireNonNull(tableName);
-        this.columnList = requireNonNull(columnList);
-        this.tableProps = tableProps;
+        this.name = requireNonNull(name);
+        this.columns = requireNonNull(columns);
         this.comment = comment;
+        this.properties = properties;
     }
 
-    public String getTableName() {
-        return tableName.getSimple();
+    public SqlIdentifier getName() {
+        return name;
     }
 
-    public SqlNodeList getColumnList() {
-        return columnList;
+    public SqlNodeList getColumns() {
+        return columns;
+    }
+
+    public SqlCharStringLiteral getComment() {
+        return comment;
+    }
+
+    public SqlNodeList getProperties() {
+        return properties;
     }
 
     @Override
     public List<SqlNode> getOperandList() {
-        return ImmutableNullableList.of(tableName, columnList, tableProps, comment);
+        return ImmutableNullableList.of(name, columns, comment, properties);
     }
 
     @Override
@@ -65,11 +72,11 @@ public class SqlCreateTable extends SqlCreate  {
         writer.keyword("CREATE TABLE");
 
         // 表名
-        tableName.unparse(writer, leftPrec, rightPrec);
+        name.unparse(writer, leftPrec, rightPrec);
 
         // 表列
         SqlWriter.Frame frame = writer.startList(SqlWriter.FrameTypeEnum.create("sds"), "(", ")");
-        for (SqlNode column : columnList) {
+        for (SqlNode column : columns) {
             printIndent(writer);
             if (column instanceof SqlBasicCall) {
                 SqlCall call = (SqlCall) column;
@@ -90,11 +97,11 @@ public class SqlCreateTable extends SqlCreate  {
         }
 
         // 属性
-        if (tableProps != null) {
+        if (properties != null) {
             writer.keyword("WITH");
             SqlWriter.Frame withFrame = writer.startList("(", ")");
-            for (SqlNode property : tableProps) {
-                SqlUtils.printIndent(writer);
+            for (SqlNode property : properties) {
+                printIndent(writer);
                 property.unparse(writer, leftPrec, rightPrec);
             }
             writer.newlineAndIndent();
@@ -102,4 +109,10 @@ public class SqlCreateTable extends SqlCreate  {
         }
     }
 
+    // 写缩进
+    private static void printIndent(SqlWriter writer) {
+        writer.sep(",", false);
+        writer.newlineAndIndent();
+        writer.print("  ");
+    }
 }

@@ -16,46 +16,49 @@
  */
 package com.sdu.calcite.sql.ddl;
 
-import com.sdu.calcite.sql.SqlUtils;
-import org.apache.calcite.sql.*;
+import static java.util.Objects.requireNonNull;
+
+import java.util.Arrays;
+import java.util.List;
+import org.apache.calcite.sql.SqlCreate;
+import org.apache.calcite.sql.SqlIdentifier;
+import org.apache.calcite.sql.SqlKind;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlOperator;
+import org.apache.calcite.sql.SqlSpecialOperator;
+import org.apache.calcite.sql.SqlWriter;
 import org.apache.calcite.sql.parser.SqlParserPos;
 
-import java.util.*;
-
-/**
- * CREATE FUNCTION function_name AS class_name WITH (
- *    groupId = '',
- *    artifactId = '',
- *    version = ''
- * )
- *
- * @author hanhan.zhang
- * */
 public class SqlCreateFunction extends SqlCreate {
 
   private static final SqlSpecialOperator OPERATOR =
           new SqlSpecialOperator("CREATE FUNCTION", SqlKind.CREATE_FUNCTION);
 
-  private final SqlIdentifier name;
-  private final SqlNode className;
-  private final SqlNodeList properties;
+  private final SqlIdentifier functionIdentifier;
 
-  /** Creates a SqlCreateFunction. */
-  public SqlCreateFunction(SqlParserPos pos, SqlIdentifier name, SqlNode className, SqlNodeList properties) {
+  private final SqlNodeList functionProps;
+
+  public SqlCreateFunction(
+      SqlParserPos pos,
+      SqlIdentifier functionIdentifier,
+      SqlNodeList functionProps) {
     super(OPERATOR, pos, false, false);
-    this.name = Objects.requireNonNull(name);
-    this.className = className;
-    this.properties = properties;
+    this.functionIdentifier = requireNonNull(functionIdentifier);
+    this.functionProps = requireNonNull(functionProps);
   }
 
   @Override
   public void unparse(SqlWriter writer, int leftPrec, int rightPrec) {
-    writer.keyword(getReplace() ? "CREATE OR REPLACE" : "CREATE");
-    writer.keyword("FUNCTION");
-    name.unparse(writer, 0, 0);
-    writer.keyword("AS");
-    className.unparse(writer, 0, 0);
-    SqlUtils.unparse(writer, properties, "WITH");
+    writer.keyword("CREATE FUNCTION");
+    functionIdentifier.unparse(writer, leftPrec, rightPrec);
+    writer.keyword("WITH");
+    SqlWriter.Frame frame = writer.startList("(", ")");
+    for (SqlNode node : functionProps) {
+      writer.sep(",");
+      node.unparse(writer, leftPrec, rightPrec);
+    }
+    writer.endList(frame);
   }
 
   @Override
@@ -65,27 +68,15 @@ public class SqlCreateFunction extends SqlCreate {
 
   @Override
   public List<SqlNode> getOperandList() {
-    return Arrays.asList(name, className, properties);
+    return Arrays.asList(functionIdentifier, functionProps);
   }
 
-  public String getFunctionName() {
-    return name.toString();
+  public SqlIdentifier getName() {
+    return functionIdentifier;
   }
 
-  public String getFunctionClass() {
-    return className.toString();
-  }
-
-  public Map<String, String> getFunctionProperties() {
-    if (properties == null) {
-      return Collections.emptyMap();
-    }
-    Map<String, String> props = new HashMap<>();
-    for (SqlNode node : properties) {
-      SqlOption propertyNode = (SqlOption) node;
-      props.put(propertyNode.getKeyString(), propertyNode.getValueString());
-    }
-    return props;
+  public SqlNodeList getProperties() {
+    return functionProps;
   }
 
 }

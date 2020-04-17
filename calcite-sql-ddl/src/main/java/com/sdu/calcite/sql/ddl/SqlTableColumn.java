@@ -2,8 +2,9 @@ package com.sdu.calcite.sql.ddl;
 
 import java.util.List;
 import javax.annotation.Nonnull;
+import org.apache.calcite.adapter.java.JavaTypeFactory;
+import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
 import org.apache.calcite.rel.type.RelDataType;
-import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlCharStringLiteral;
 import org.apache.calcite.sql.SqlDataTypeSpec;
@@ -20,27 +21,47 @@ public class SqlTableColumn extends SqlCall {
 
   private static final SqlSpecialOperator OPERATOR = new SqlSpecialOperator("COLUMN_DESC", SqlKind.COLUMN_DECL);
 
+  // TODO:
+  private static final JavaTypeFactory typeFactory = new JavaTypeFactoryImpl();
+
   private SqlIdentifier name;
   private SqlDataTypeSpec type;
+  private SqlCharStringLiteral path;
   private SqlCharStringLiteral comment;
 
-  public SqlTableColumn(SqlParserPos pos, SqlIdentifier name, SqlDataTypeSpec type, SqlCharStringLiteral comment) {
+  public SqlTableColumn(
+      SqlParserPos pos,
+      SqlIdentifier name,
+      SqlDataTypeSpec type,
+      SqlCharStringLiteral path,
+      SqlCharStringLiteral comment) {
     super(pos);
     this.name = name;
     this.type = type;
+    this.path = path;
     this.comment = comment;
   }
 
-  public String getName() {
-    return name.getSimple();
+  public SqlIdentifier getName() {
+    return name;
   }
 
-  public String getComment() {
-    return comment.getNlsString().getValue();
+  public SqlCharStringLiteral getPath() {
+    return path;
   }
 
-  public RelDataType getType(RelDataTypeFactory typeFactory) {
-    return type.deriveType(typeFactory);
+  public SqlCharStringLiteral getComment() {
+    // comment.getNlsString().getValue()
+    return comment;
+  }
+
+  public String dataType() {
+    try {
+      RelDataType relDataType = type.deriveType(typeFactory);
+      return relDataType.getSqlTypeName().getName();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Nonnull
@@ -58,8 +79,12 @@ public class SqlTableColumn extends SqlCall {
   @Override
   public void unparse(SqlWriter writer, int leftPrec, int rightPrec) {
     name.unparse(writer, leftPrec, rightPrec);
-    writer.print(" ");
+    writer.print("  ");
     type.unparse(writer, leftPrec, rightPrec);
+    if (this.path != null) {
+      writer.print("  ");
+      path.unparse(writer, leftPrec, rightPrec);
+    }
     if (this.comment != null) {
       writer.print(" COMMENT ");
       comment.unparse(writer, leftPrec, rightPrec);

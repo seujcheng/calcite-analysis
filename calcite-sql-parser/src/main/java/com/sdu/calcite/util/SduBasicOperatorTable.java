@@ -1,4 +1,4 @@
-package com.sdu.calcite.sql;
+package com.sdu.calcite.util;
 
 import static org.apache.calcite.sql.type.OperandTypes.DATETIME_INTERVAL;
 import static org.apache.calcite.sql.type.OperandTypes.DATETIME_INTERVAL_INTERVAL;
@@ -15,7 +15,7 @@ import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.type.OperandTypes;
 import org.apache.calcite.sql.util.ReflectiveSqlOperatorTable;
 
-class XBasicOperatorTable extends ReflectiveSqlOperatorTable {
+class SduBasicOperatorTable extends ReflectiveSqlOperatorTable {
 
   // 翻转窗口
   private static final SqlGroupedWindowFunction TUMBLE = new SqlGroupedWindowFunction(
@@ -217,19 +217,19 @@ class XBasicOperatorTable extends ReflectiveSqlOperatorTable {
     builtInSqlOperators.add(SqlStdOperatorTable.RUNNING);
 
     // WINDOW
-    builtInSqlOperators.add(XBasicOperatorTable.TUMBLE);
-    builtInSqlOperators.add(XBasicOperatorTable.TUMBLE_START);
-    builtInSqlOperators.add(XBasicOperatorTable.TUMBLE_END);
-    builtInSqlOperators.add(XBasicOperatorTable.HOP);
-    builtInSqlOperators.add(XBasicOperatorTable.HOP_START);
-    builtInSqlOperators.add(XBasicOperatorTable.HOP_END);
-    builtInSqlOperators.add(XBasicOperatorTable.SESSION);
-    builtInSqlOperators.add(XBasicOperatorTable.SESSION_START);
-    builtInSqlOperators.add(XBasicOperatorTable.SESSION_END);
+    builtInSqlOperators.add(SduBasicOperatorTable.TUMBLE);
+    builtInSqlOperators.add(SduBasicOperatorTable.TUMBLE_START);
+    builtInSqlOperators.add(SduBasicOperatorTable.TUMBLE_END);
+    builtInSqlOperators.add(SduBasicOperatorTable.HOP);
+    builtInSqlOperators.add(SduBasicOperatorTable.HOP_START);
+    builtInSqlOperators.add(SduBasicOperatorTable.HOP_END);
+    builtInSqlOperators.add(SduBasicOperatorTable.SESSION);
+    builtInSqlOperators.add(SduBasicOperatorTable.SESSION_START);
+    builtInSqlOperators.add(SduBasicOperatorTable.SESSION_END);
 
   }
 
-  XBasicOperatorTable() {
+  SduBasicOperatorTable() {
     builtInSqlOperators.forEach(this::register);
   }
 

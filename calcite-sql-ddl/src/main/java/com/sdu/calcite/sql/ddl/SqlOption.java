@@ -12,10 +12,6 @@ import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.util.ImmutableNullableList;
 import org.apache.calcite.util.NlsString;
 
-/**
- *
- * @author hanhan.zhang
- * */
 public class SqlOption extends SqlCall {
 
     private static final SqlOperator OPERATOR = new SqlSpecialOperator("SQL_PROPERTY", SqlKind.ATTRIBUTE_DEF);

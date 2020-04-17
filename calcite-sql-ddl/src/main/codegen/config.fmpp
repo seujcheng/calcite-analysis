@@ -17,7 +17,7 @@ data: {
     parser: {
       # Generated parser implementation class package and name
       package: "com.sdu.calcite.sql.parser",
-      class: "XSqlParserImpl",
+      class: "SduSqlParserImpl",
 
       # List of import statements.
       imports: [
@@ -34,16 +34,14 @@ data: {
         "COMMENT",
         "VIRTUAL",
         "STORED",
-        "IF",
-        "USE"
+        "IF"
       ]
 
       # List of keywords from "keywords" section that are not reserved.
       nonReservedKeywords: [
         "VIRTUAL",
         "STORED",
-        "IF",
-        "USE"
+        "IF"
       ]
 
       # List of additional join types. Each is a method with no arguments.
@@ -53,7 +51,7 @@ data: {
 
       # List of methods for parsing custom SQL statements(扩展自定义SQL解析函数).
       statementParserMethods: [
-        "SqlUseFunction()"
+
       ]
 
       # List of methods for parsing custom literals.

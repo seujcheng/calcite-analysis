@@ -16,11 +16,11 @@
 -->
 
 /**
-(name = value [, name = value]*)
-LPAREN: 左括号
-COMMA: 逗号
-RPAREN: 右括号
-**/
+   * (name = value [, name = value]*)
+   * LPAREN: 左括号
+   * COMMA: 逗号
+   * RPAREN: 右括号
+   **/
 SqlNodeList SqlOptions() :
 {
     SqlNode property;
@@ -51,8 +51,8 @@ SqlNodeList SqlOptions() :
 }
 
 /**
-name = value
-**/
+  *  name = value
+  **/
 SqlNode SqlOption() :
 {
     SqlNode key;
@@ -74,17 +74,27 @@ void TableColumn(List<SqlNode> list) :
    SqlParserPos pos;
    SqlIdentifier name;
    SqlDataTypeSpec type;
+   SqlCharStringLiteral path = null;
    SqlCharStringLiteral comment = null;
 }
 {
     name = SimpleIdentifier()
     type = DataType()
-    [ <COMMENT> <QUOTED_STRING> {
-        String p = SqlParserUtil.parseString(token.image);
-        comment = SqlLiteral.createCharString(p, getPos());
-    }]
+    [
+        <QUOTED_STRING> {
+            String p = SqlParserUtil.parseString(token.image);
+            path = SqlLiteral.createCharString(p, getPos());
+        }
+    ]
+    [
+        <COMMENT> <QUOTED_STRING> {
+            String p = SqlParserUtil.parseString(token.image);
+            comment = SqlLiteral.createCharString(p, getPos());
+        }
+    ]
+
     {
-        SqlTableColumn column = new SqlTableColumn(getPos(), name, type, comment);
+        SqlTableColumn column = new SqlTableColumn(getPos(), name, type, path, comment);
         list.add(column);
     }
 }
@@ -92,9 +102,9 @@ void TableColumn(List<SqlNode> list) :
 SqlCreate SqlCreateTable(Span s, boolean replace) :
 {
     final SqlParserPos startPos = s.pos();
-    SqlIdentifier tableName;
-    SqlNodeList columnList = SqlNodeList.EMPTY;
-    SqlNodeList tableProps = SqlNodeList.EMPTY;
+    SqlIdentifier name;
+    SqlNodeList tableColumns = SqlNodeList.EMPTY;
+    SqlNodeList properties = SqlNodeList.EMPTY;
     SqlCharStringLiteral comment = null;
 
     SqlParserPos pos = startPos;
@@ -103,12 +113,15 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
     <TABLE>
 
     // 解析表名
-    tableName = CompoundIdentifier()
+    name = CompoundIdentifier()
 
     // 解析列
     [
         <LPAREN>
-            { pos = getPos(); List<SqlNode> columns = new ArrayList<SqlNode>();}
+            {
+                pos = getPos();
+                List<SqlNode> columns = new ArrayList<SqlNode>();
+            }
             TableColumn(columns)
             (
                 <COMMA> TableColumn(columns)
@@ -116,7 +129,7 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
         <RPAREN>
         {
             pos = pos.plus(getPos());
-            columnList = new SqlNodeList(columns, pos);
+            tableColumns = new SqlNodeList(columns, pos);
         }
     ]
 
@@ -131,52 +144,33 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
     // 解析表属性
     [
         <WITH>
-        tableProps = SqlOptions()
+        properties = SqlOptions()
     ]
 
     {
-        return new SqlCreateTable(startPos.plus(getPos()), tableName, columnList, tableProps, comment);
+        return new SqlCreateTable(startPos.plus(getPos()), name, tableColumns, comment, properties);
     }
 }
 
 /**
-CREATE FUNCTION function_name AS class_name [WITH ( name = value [, name = value]* )]
-**/
+  * CREATE FUNCTION func_name [WITH ( name = value [, name = value]* )]
+  **/
 SqlCreate SqlCreateFunction(Span s, boolean replace) :
 {
     final SqlIdentifier name;
-    final SqlNode className;
-    SqlNodeList properties = null;
+    SqlNodeList properties = SqlNodeList.EMPTY;
 }
 {
     <FUNCTION>
-        name = SimpleIdentifier()
-    <AS>
-        className = StringLiteral()
-    [ <WITH> properties = SqlOptions() ]
-    {
-        return new SqlCreateFunction(s.end(this), name, className, properties);
-    }
-}
 
-/**
-USE FUNCTION function_name AS class_name WITH (name = value [, name = value]*)
-**/
-SqlCall SqlUseFunction() :
-{
-   final Span s = Span.of();
-   final SqlIdentifier name;
-   final SqlNode className;
-   SqlNodeList properties = null;
-}
-{
-    <USE> <FUNCTION>
         name = SimpleIdentifier()
-    <AS>
-        className = StringLiteral()
-    [ <WITH> properties = SqlOptions() ]
+
+    [
+        <WITH> properties = SqlOptions()
+    ]
+
     {
-        return new SqlUseFunction(s.end(this), name, className, properties);
+        return new SqlCreateFunction(s.end(this), name, properties);
     }
 }
 

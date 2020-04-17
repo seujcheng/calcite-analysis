@@ -1,10 +1,7 @@
-package com.sdu.calcite.sql.planner;
+package com.sdu.calcite.parser;
 
-import com.sdu.calcite.sql.XCalciteSqlValidator;
-import com.sdu.calcite.sql.table.XNodePath;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
 import org.apache.calcite.config.CalciteConnectionProperty;
 import org.apache.calcite.jdbc.CalciteSchema;
@@ -18,21 +15,21 @@ import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
 
-public class XSqlPlanner {
+public class SduCalciteSqlPlanner {
 
   private final FrameworkConfig frameworkConfig;
   private final RelOptPlanner planner;
   private final RelDataTypeFactory typeFactory;
 
-  private XCalciteSqlValidator validator;
+  private SduCalciteSqlValidator validator;
 
-  public XSqlPlanner(FrameworkConfig frameworkConfig, RelOptPlanner planner, RelDataTypeFactory typeFactory) {
+  public SduCalciteSqlPlanner(FrameworkConfig frameworkConfig, RelOptPlanner planner,
+      RelDataTypeFactory typeFactory) {
     this.frameworkConfig = frameworkConfig;
     this.planner = planner;
     this.typeFactory = typeFactory;
@@ -49,7 +46,7 @@ public class XSqlPlanner {
         frameworkConfig.getParserConfig());
 
     // Validate SqlNode
-    validator = new XCalciteSqlValidator(frameworkConfig.getOperatorTable(),
+    validator = new SduCalciteSqlValidator(frameworkConfig.getOperatorTable(),
         catalogReader, typeFactory, frameworkConfig.getParserConfig().conformance());
 
     // Translate To RelNode
@@ -64,10 +61,6 @@ public class XSqlPlanner {
         frameworkConfig.getSqlToRelConverterConfig());
 
     return sqlToRelConverter.convertQuery(sqlNode, true, true);
-  }
-
-  public Set<XNodePath> getGroupNodeMeta(SqlSelect select) {
-    return validator.getAggregateNodePaths(select);
   }
 
   private static class ViewExpanderImpl implements RelOptTable.ViewExpander {
