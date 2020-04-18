@@ -4,14 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sdu.calcite.function.FunctionKind;
 import com.sdu.calcite.function.ScalarFunction;
 import com.sdu.calcite.function.TableFunction;
-import com.sdu.calcite.function.UserDefinedAggregateFunction;
+import com.sdu.calcite.function.AggregateFunction;
 import com.sdu.calcite.function.UserDefinedFunction;
 import com.sdu.calcite.sql.ddl.SqlCreateFunction;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Data;
-import org.apache.calcite.schema.AggregateFunction;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParserPos;
 
@@ -77,7 +76,7 @@ public abstract class SduFunction {
           return sduScalarFunction;
 
         case AGGREGATE:
-          UserDefinedAggregateFunction<?, ?> aggregateFunction = (UserDefinedAggregateFunction<?, ?>) definedFunction;
+          AggregateFunction<?, ?> aggregateFunction = (AggregateFunction<?, ?>) definedFunction;
           return SduAggregateFunction.fromUserDefinedFunction(aggregateFunction);
 
         default:

@@ -1,14 +1,14 @@
 package com.sdu.calcite.entry;
 
 import com.sdu.calcite.function.FunctionKind;
-import com.sdu.calcite.function.UserDefinedAggregateFunction;
+import com.sdu.calcite.function.AggregateFunction;
 import com.sdu.calcite.function.UserDefinedFunction;
 import lombok.Data;
 
 @Data
 public class SduAggregateFunction extends SduFunction {
 
-  private UserDefinedAggregateFunction<?, ?> aggregateFunction;
+  private AggregateFunction<?, ?> aggregateFunction;
   private boolean requiresOver;
 
   @Override
@@ -21,7 +21,7 @@ public class SduAggregateFunction extends SduFunction {
     return FunctionKind.AGGREGATE;
   }
 
-  static SduAggregateFunction fromUserDefinedFunction(UserDefinedAggregateFunction<?, ?> function) {
+  static SduAggregateFunction fromUserDefinedFunction(AggregateFunction<?, ?> function) {
     SduAggregateFunction sduAggregateFunction = new SduAggregateFunction();
     sduAggregateFunction.setAggregateFunction(function);
     sduAggregateFunction.setDeterministic(function.isDeterministic());
