@@ -4,6 +4,8 @@ public abstract class UserDefinedAggregateFunction<T, ACC> extends UserDefinedFu
 
   public abstract ACC createAccumulator();
 
+  public abstract boolean requiresOver();
+
   @Override
   public FunctionKind getKind() {
     return FunctionKind.AGGREGATE;

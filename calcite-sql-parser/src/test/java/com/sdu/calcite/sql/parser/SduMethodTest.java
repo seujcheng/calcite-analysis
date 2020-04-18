@@ -19,10 +19,15 @@ public class SduMethodTest {
       return sum;
     }
 
+    public int eval(int a, int b) {
+     return a + b;
+    }
+
   }
 
   @Test
-  public void testArgsMethods() {
+  @SuppressWarnings("unchecked")
+  public void testArgsMethods() throws Exception {
     List<Method> methods = Arrays.stream(ArgsMethods.class.getMethods())
         .filter(m -> m.getName().equals("add"))
         .collect(Collectors.toList());
@@ -30,6 +35,8 @@ public class SduMethodTest {
     Method method = methods.get(0);
     System.out.println(method.getParameterTypes().length);
 
+    Method evalMethod = ArgsMethods.class.getMethod("eval", Integer.TYPE, Integer.TYPE);
+    System.out.println(evalMethod.getName());
   }
 
 }

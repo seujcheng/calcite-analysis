@@ -1,5 +1,6 @@
 package com.sdu.calcite.types;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Date;
@@ -88,28 +89,44 @@ public class SduTypeFactory extends JavaTypeFactoryImpl {
   }
 
   @Override
-  public Class<?> getJavaClass(RelDataType type) {
+  public Type getJavaClass(RelDataType type) {
     switch (type.getSqlTypeName()) {
+      /*
+       * 基本类型必须返回Type, 原因:
+       *
+       * public class A {
+       *
+       *    public int eval(int a, int b);
+       *
+       * }
+       *
+       * 基于Java反射查找eval方法时:
+       *
+       *  若用 getMethod('eval', Integer.class, Integer.class) 则找不到方法的
+       *
+       *  若用 getMethod('eval', Integer.Type, Integer.Type) 则可以找到的
+       *
+       * */
       case BOOLEAN:
-        return Boolean.class;
+        return Boolean.TYPE;
 
       case TINYINT:
-        return Byte.class;
+        return Byte.TYPE;
 
       case SMALLINT:
-        return Short.class;
+        return Short.TYPE;
 
       case INTEGER:
-        return Integer.class;
+        return Integer.TYPE;
 
       case BIGINT:
-        return Long.class;
+        return Long.TYPE;
 
       case FLOAT:
-        return Float.class;
+        return Float.TYPE;
 
       case DOUBLE:
-        return Double.class;
+        return Double.TYPE;
 
       case DECIMAL:
         return BigDecimal.class;
@@ -131,11 +148,14 @@ public class SduTypeFactory extends JavaTypeFactoryImpl {
       case MAP:
         return Map.class;
 
+      case NULL:
+        return Void.class;
+
       case ANY:
         return Object.class;
 
       default:
-        throw new UnsupportedOperationException("Unsupported type: " + type);
+        return super.getJavaClass(type);
     }
   }
 

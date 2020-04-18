@@ -2,7 +2,7 @@ package com.sdu.calcite.catelog;
 
 import static com.sdu.calcite.util.UserDefinedFunctionUtils.createEvalOperandTypeChecker;
 import static com.sdu.calcite.util.UserDefinedFunctionUtils.createEvalOperandTypeInference;
-import static com.sdu.calcite.util.UserDefinedFunctionUtils.getEvalMethodSignature;
+import static com.sdu.calcite.util.UserDefinedFunctionUtils.getEvalMethod;
 
 import com.sdu.calcite.entry.SduScalarFunction;
 import com.sdu.calcite.types.SduTypeFactory;
@@ -60,7 +60,7 @@ public class SduCalciteScalarFunction extends SqlFunction {
             .map(typeFactory::getJavaClass)
             .toArray(Class<?>[]::new);
 
-        Method method = getEvalMethodSignature(function.getScalarFunction(), parameters);
+        Method method = getEvalMethod(function.getScalarFunction(), parameters);
 
         return typeFactory.createSqlType(method.getReturnType().getName());
       }

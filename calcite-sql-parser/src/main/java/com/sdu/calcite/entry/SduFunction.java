@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sdu.calcite.function.FunctionKind;
 import com.sdu.calcite.function.ScalarFunction;
 import com.sdu.calcite.function.TableFunction;
+import com.sdu.calcite.function.UserDefinedAggregateFunction;
 import com.sdu.calcite.function.UserDefinedFunction;
 import com.sdu.calcite.sql.ddl.SqlCreateFunction;
 import java.util.Map;
@@ -27,6 +28,8 @@ public abstract class SduFunction {
   private boolean deterministic;
 
   private Map<String, SduOption> properties;
+
+  public abstract UserDefinedFunction getUserDefinedFunction();
 
   public abstract FunctionKind getKind();
 
@@ -59,7 +62,11 @@ public abstract class SduFunction {
       switch (definedFunction.getKind()) {
         case TABLE:
           TableFunction<?> tableFunction = (TableFunction<?>) definedFunction;
-          return SduTableFunction.fromUserDefinedFunction(tableFunction);
+          SduTableFunction sduTableFunction = SduTableFunction.fromUserDefinedFunction(tableFunction);
+          sduTableFunction.setPos(createFunction.getParserPosition());
+          sduTableFunction.setName(createFunction.getName().getSimple());
+          sduTableFunction.setProperties(properties);
+          return sduTableFunction;
 
         case SCALAR:
           ScalarFunction scalarFunction = (ScalarFunction) definedFunction;
@@ -70,7 +77,7 @@ public abstract class SduFunction {
           return sduScalarFunction;
 
         case AGGREGATE:
-          AggregateFunction aggregateFunction = (AggregateFunction) definedFunction;
+          UserDefinedAggregateFunction<?, ?> aggregateFunction = (UserDefinedAggregateFunction<?, ?>) definedFunction;
           return SduAggregateFunction.fromUserDefinedFunction(aggregateFunction);
 
         default:

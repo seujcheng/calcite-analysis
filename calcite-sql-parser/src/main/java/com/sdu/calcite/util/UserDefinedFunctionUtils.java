@@ -2,15 +2,28 @@ package com.sdu.calcite.util;
 
 import static java.lang.String.format;
 
+import com.sdu.calcite.catelog.SduCalciteAggFunction;
 import com.sdu.calcite.catelog.SduCalciteScalarFunction;
+import com.sdu.calcite.catelog.SduCalciteTableFunction;
+import com.sdu.calcite.catelog.SduTableFunctionImpl;
 import com.sdu.calcite.entry.SduAggregateFunction;
+import com.sdu.calcite.entry.SduFunction;
 import com.sdu.calcite.entry.SduScalarFunction;
 import com.sdu.calcite.entry.SduTableFunction;
+import com.sdu.calcite.function.FunctionKind;
+import com.sdu.calcite.function.TableFunction;
 import com.sdu.calcite.function.UserDefinedFunction;
 import com.sdu.calcite.types.SduTypeFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.stream.IntStream;
+import org.apache.calcite.rel.type.RelDataType;
+import org.apache.calcite.sql.SqlCallBinding;
 import org.apache.calcite.sql.SqlFunction;
+import org.apache.calcite.sql.SqlOperandCountRange;
+import org.apache.calcite.sql.SqlOperator;
+import org.apache.calcite.sql.type.SqlOperandCountRanges;
 import org.apache.calcite.sql.type.SqlOperandTypeChecker;
 import org.apache.calcite.sql.type.SqlOperandTypeInference;
 
@@ -20,7 +33,9 @@ public class UserDefinedFunctionUtils {
   }
 
   public static SqlFunction convertTableSqlFunction(SduTypeFactory typeFactory, String name, SduTableFunction tableFunction) {
-    throw new RuntimeException();
+    TableFunction<?> function = tableFunction.getTableFunction();
+    SduTableFunctionImpl functionImpl = new SduTableFunctionImpl(function.getColumnNames(), function.getColumnTypes());
+    return new SduCalciteTableFunction(name, typeFactory, tableFunction, functionImpl);
   }
 
   public static SqlFunction convertScalarSqlFunction(SduTypeFactory typeFactory, String name, SduScalarFunction scalarFunction) {
@@ -28,38 +43,162 @@ public class UserDefinedFunctionUtils {
   }
 
   public static SqlFunction convertAggregateFunction(SduTypeFactory typeFactory, String name, SduAggregateFunction aggFunction) {
-    throw new RuntimeException();
+    return new SduCalciteAggFunction(name, typeFactory, aggFunction);
   }
 
-  public static Method getEvalMethodSignature(UserDefinedFunction definedFunction, Class<?>[] signatures) {
-    return checkAndExtractMethods(definedFunction, "eval", signatures);
+  public static Method getEvalMethod(UserDefinedFunction definedFunction, Class<?>[] signatures) {
+    return getEvalMethod(definedFunction, signatures, true);
   }
 
-  private static Method checkAndExtractMethods(UserDefinedFunction definedFunction, String methodName, Class<?>[] signatures) {
+  public static Method getEvalMethod(UserDefinedFunction definedFunction, Class<?>[] signatures, boolean throwOnFailure) {
+    return checkAndExtractMethod(definedFunction, "eval", signatures, throwOnFailure);
+  }
+
+  private static Method checkAndExtractMethod(UserDefinedFunction definedFunction, String methodName, Class<?>[] signatures, boolean throwOnFailure) {
     try {
       Method method = definedFunction.getClass().getMethod(methodName, signatures);
       int modifiers = method.getModifiers();
       if (Modifier.isPublic(modifiers) && !Modifier.isAbstract(modifiers)) {
         return method;
       }
-
-      throw new RuntimeException(format("Function class %s does not implement at least one method named '%s' which is "
-          + "public, not abstract and (in case of table functions) not static.", definedFunction.getClass().getName(), methodName));
+      if (throwOnFailure) {
+        throw new RuntimeException(format("Function class %s does not implement at least one method named '%s' which is "
+            + "public, not abstract and (in case of table functions) not static.", definedFunction.getClass().getName(), methodName));
+      }
+      return null;
     } catch (NoSuchMethodException e) {
-      throw new RuntimeException(format("Function class %s does not implement at least one method named %s(%s).",
-          definedFunction.getClass().getName(), methodName, formatSignature(signatures)));
+      if (throwOnFailure) {
+        throw new RuntimeException(format("Function class %s does not implement at least one method named %s(%s).",
+            definedFunction.getClass().getName(), methodName, signaturesToString(signatures)));
+      }
+      return null;
     }
   }
 
-  public static SqlOperandTypeInference createEvalOperandTypeInference(SduTypeFactory typeFactory, SduScalarFunction function) {
-    throw new RuntimeException();
+  private static Method[] checkAndExtractMethods(UserDefinedFunction definedFunction, String methodName) {
+    Method[] methods = Arrays.stream(definedFunction.getClass().getMethods())
+        .filter(method -> {
+          int modifiers = method.getModifiers();
+          return method.getName().equals(methodName)
+              && Modifier.isPublic(modifiers)
+              && !Modifier.isAbstract(modifiers);
+        })
+        .toArray(Method[]::new);
+
+    if (methods.length == 0) {
+      throw new RuntimeException(format("Function class %s does not implement at least one method named '%s' which is "
+          + "public, not abstract and (in case of table functions) not static.", definedFunction.getClass().getName(), methodName));
+    }
+
+    return methods;
   }
 
-  public static SqlOperandTypeChecker createEvalOperandTypeChecker(SduTypeFactory typeFactory, SduScalarFunction function) {
-    throw new RuntimeException();
+  public static SqlOperandTypeInference createEvalOperandTypeInference(SduTypeFactory typeFactory, SduFunction function) {
+
+    class SqlOperandTypeInferenceImpl implements SqlOperandTypeInference {
+
+      private final SduTypeFactory typeFactory;
+      private final SduFunction function;
+
+      private SqlOperandTypeInferenceImpl(SduTypeFactory typeFactory, SduFunction function) {
+        this.typeFactory = typeFactory;
+        this.function = function;
+      }
+
+      @Override
+      public void inferOperandTypes(SqlCallBinding callBinding, RelDataType returnType, RelDataType[] operandTypes) {
+        if (function.getKind() != FunctionKind.SCALAR && function.getKind() != FunctionKind.TABLE) {
+          throw new RuntimeException("Unsupported function, kind: " + function.getKind());
+        }
+
+        Class<?>[] operandTypeInfo = getOperandTypeInfo(callBinding, typeFactory);
+        Method method = getEvalMethod(function.getUserDefinedFunction(), operandTypeInfo);
+        Class<?>[] signatures = method.getParameterTypes();
+        for (int i = 0; i < signatures.length; ++i) {
+          operandTypes[i] = typeFactory.createSqlType(signatures[i].getName());
+        }
+      }
+    }
+
+    return new SqlOperandTypeInferenceImpl(typeFactory, function);
   }
 
-  private static String formatSignature(Class<?>[] signatures) {
+  public static SqlOperandTypeChecker createEvalOperandTypeChecker(SduTypeFactory typeFactory, SduFunction function) {
+
+    class SqlOperandTypeCheckerImpl implements SqlOperandTypeChecker {
+
+      private final SduTypeFactory typeFactory;
+      private final SduFunction function;
+
+      private final Method[] methods;
+
+      private SqlOperandTypeCheckerImpl(SduTypeFactory typeFactory, SduFunction function) {
+        this.typeFactory = typeFactory;
+        this.function = function;
+        this.methods = checkAndExtractMethods(function.getUserDefinedFunction(), "eval");
+      }
+
+      @Override
+      public boolean checkOperandTypes(SqlCallBinding callBinding, boolean throwOnFailure) {
+        Class<?>[] operandTypeInfo = getOperandTypeInfo(callBinding, typeFactory);
+        Method method = getEvalMethod(function.getUserDefinedFunction(), operandTypeInfo, false);
+        if (method == null) {
+          if (throwOnFailure) {
+            throw new RuntimeException(format("Function class %s does not implement at least one method named eval(%s).",
+                function.getUserDefinedFunction().getClass().getName(), signaturesToString(operandTypeInfo)));
+          }
+          return false;
+        }
+        return true;
+      }
+
+      @Override
+      public SqlOperandCountRange getOperandCountRange() {
+        int min = 254;
+        int max = -1;
+        boolean isVarargs = false;
+        for (Method m : methods) {
+          int len = m.getParameterTypes().length;
+          if (len > 0 && m.isVarArgs() && m.getParameterTypes()[len - 1].isArray()) {
+            isVarargs = true;
+            len = len - 1;
+          }
+          max = Math.max(len, max);
+          min = Math.min(len, min);
+        }
+        if (isVarargs) {
+          // if eval method is varargs, set max to -1 to skip length check in Calcite
+          max = -1;
+        }
+        return SqlOperandCountRanges.between(min, max);
+      }
+
+      @Override
+      public String getAllowedSignatures(SqlOperator op, String opName) {
+        return format("opName[%s]", opName);
+      }
+
+      @Override
+      public Consistency getConsistency() {
+        return Consistency.NONE;
+      }
+
+      @Override
+      public boolean isOptional(int i) {
+        return false;
+      }
+    }
+
+    return new SqlOperandTypeCheckerImpl(typeFactory, function);
+  }
+
+  private static Class<?>[] getOperandTypeInfo(SqlCallBinding callBinding, SduTypeFactory typeFactory) {
+    return IntStream.range(0, callBinding.getOperandCount())
+        .mapToObj(i -> typeFactory.getJavaClass(callBinding.getOperandType(i)))
+        .toArray(Class<?>[]::new);
+  }
+
+  private static String signaturesToString(Class<?>[] signatures) {
     if (signatures == null || signatures.length == 0) return "";
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < signatures.length; ++i) {

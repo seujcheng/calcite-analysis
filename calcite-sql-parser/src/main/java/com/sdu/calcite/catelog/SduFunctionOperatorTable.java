@@ -17,12 +17,12 @@ import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.SqlSyntax;
 import org.apache.calcite.sql.validate.SqlNameMatcher;
 
-public class FunctionCatalogOperatorTable implements SqlOperatorTable {
+public class SduFunctionOperatorTable implements SqlOperatorTable {
 
   private final FunctionCatalog functionCatalog;
   private final SduTypeFactory typeFactory;
 
-  public FunctionCatalogOperatorTable(FunctionCatalog functionCatalog, SduTypeFactory typeFactory) {
+  public SduFunctionOperatorTable(FunctionCatalog functionCatalog, SduTypeFactory typeFactory) {
     this.functionCatalog = functionCatalog;
     this.typeFactory = typeFactory;
   }
