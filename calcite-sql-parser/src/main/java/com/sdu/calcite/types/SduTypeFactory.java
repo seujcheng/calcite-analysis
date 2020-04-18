@@ -1,6 +1,5 @@
 package com.sdu.calcite.types;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Date;
@@ -89,7 +88,7 @@ public class SduTypeFactory extends JavaTypeFactoryImpl {
   }
 
   @Override
-  public Type getJavaClass(RelDataType type) {
+  public Class<?> getJavaClass(RelDataType type) {
     switch (type.getSqlTypeName()) {
       case BOOLEAN:
         return Boolean.class;
@@ -136,7 +135,7 @@ public class SduTypeFactory extends JavaTypeFactoryImpl {
         return Object.class;
 
       default:
-        return super.getJavaClass(type);
+        throw new UnsupportedOperationException("Unsupported type: " + type);
     }
   }
 

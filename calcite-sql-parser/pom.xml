@@ -20,7 +20,13 @@
 
     <dependency>
       <groupId>com.sdu.calcite</groupId>
-      <artifactId>calcite-sql-ddl</artifactId>
+      <artifactId>calcite-sql-extend</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sdu.calcite</groupId>
+      <artifactId>calcite-sql-function</artifactId>
       <version>${project.version}</version>
     </dependency>
 

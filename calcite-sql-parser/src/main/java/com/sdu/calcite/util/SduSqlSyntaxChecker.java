@@ -10,7 +10,7 @@ import com.sdu.calcite.entry.SduSqlStatement;
 import com.sdu.calcite.parser.SduCalciteSqlPlanner;
 import com.sdu.calcite.parser.SduRelBuilder;
 import com.sdu.calcite.parser.SduSqlParserImplFactory;
-import com.sdu.calcite.schema.SduCalciteTable;
+import com.sdu.calcite.catelog.SduCalciteTable;
 import com.sdu.calcite.types.SduTypeFactory;
 import java.util.Collections;
 import java.util.List;

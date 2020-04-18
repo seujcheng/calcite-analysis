@@ -10,9 +10,10 @@
     <version>1.0-SNAPSHOT</version>
 
     <modules>
-        <module>calcite-sql-ddl</module>
+        <module>calcite-sql-extend</module>
         <module>calcite-sql-parser</module>
         <module>calcite-sql-planner</module>
+        <module>calcite-sql-function</module>
     </modules>
 
     <properties>

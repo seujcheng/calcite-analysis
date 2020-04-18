@@ -1,4 +1,4 @@
-package com.sdu.calcite.schema;
+package com.sdu.calcite.catelog;
 
 import com.sdu.calcite.entry.SduOption;
 import com.sdu.calcite.entry.SduTableColumn;
