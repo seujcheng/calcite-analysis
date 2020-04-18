@@ -13,7 +13,7 @@ public class SduRelBuilder extends RelBuilder {
   }
 
   public RelOptPlanner getPlaner() {
-    throw new RuntimeException("");
+    return cluster.getPlanner();
   }
 
 }

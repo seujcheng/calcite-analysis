@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Data;
+import org.apache.calcite.sql.SqlCharStringLiteral;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.parser.SqlParserPos;
@@ -21,6 +22,8 @@ public class SduTable {
 
   private List<SduTableColumn> columns;
 
+  private String comment;
+
   private Map<String, SduOption> properties;
 
 
@@ -31,7 +34,11 @@ public class SduTable {
       SduTable table = new SduTable();
       table.setPos(sqlCreateTable.getParserPosition());
       table.setName(sqlCreateTable.getName().getSimple());
-
+      SqlCharStringLiteral comment = sqlCreateTable.getComment();
+      if (comment != null) {
+        table.setComment(comment.getNlsString().getValue());
+      }
+      
       List<SduTableColumn> columns = sqlCreateTable.getColumns().getList()
           .stream()
           .map(SduTableColumn::fromSqlTableColumn)

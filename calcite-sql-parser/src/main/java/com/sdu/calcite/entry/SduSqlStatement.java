@@ -10,12 +10,16 @@ public class SduSqlStatement {
 
   private List<SduFunction> functions;
 
-  private SduSqlStatement(List<SduTable> tables, List<SduFunction> functions) {
+  private List<SduInsert> inserts;
+
+  private SduSqlStatement(List<SduTable> tables, List<SduFunction> functions, List<SduInsert> inserts) {
     this.tables = tables;
     this.functions = functions;
+    this.inserts = inserts;
   }
 
-  public static SduSqlStatement of(List<SduTable> tables, List<SduFunction> functions) {
-    return new SduSqlStatement(tables, functions);
+  public static SduSqlStatement of(List<SduTable> tables, List<SduFunction> functions, List<SduInsert> inserts) {
+    return new SduSqlStatement(tables, functions, inserts);
   }
+
 }

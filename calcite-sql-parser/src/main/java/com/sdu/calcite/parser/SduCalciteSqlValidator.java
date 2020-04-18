@@ -15,4 +15,5 @@ class SduCalciteSqlValidator extends SqlValidatorImpl {
       SqlConformance conformance) {
     super(opTab, catalogReader, typeFactory, conformance);
   }
+
 }

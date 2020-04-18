@@ -1,8 +1,10 @@
 package com.sdu.calcite.util;
 
 import com.sdu.calcite.entry.SduFunction;
+import com.sdu.calcite.entry.SduInsert;
 import com.sdu.calcite.entry.SduSqlStatement;
 import com.sdu.calcite.entry.SduTable;
+import com.sdu.calcite.parser.SduSqlParserImplFactory;
 import com.sdu.calcite.sql.ddl.SqlCreateFunction;
 import com.sdu.calcite.sql.ddl.SqlCreateTable;
 import com.sdu.calcite.sql.parser.SduSqlParserImpl;
@@ -10,42 +12,16 @@ import java.io.StringReader;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.calcite.config.Lex;
+import org.apache.calcite.sql.SqlInsert;
 import org.apache.calcite.sql.SqlNodeList;
-import org.apache.calcite.sql.parser.SqlParser;
 
 public class SduSqlParser {
 
   private static SqlNodeList parse(String sql) throws Exception {
-    SqlParser.Config config = SqlParser.configBuilder()
-        .setLex(Lex.JAVA)
-        .setQuotedCasing(Lex.JAVA.quotedCasing)
-        .setUnquotedCasing(Lex.JAVA.unquotedCasing)
-        .build();
-
-    SduSqlParserImpl parser = new SduSqlParserImpl(new StringReader(sql));
-    parser.setOriginalSql(sql);
-    parser.setTabSize(1);
-    parser.setQuotedCasing(config.quotedCasing());
-    parser.setUnquotedCasing(config.unquotedCasing());
-    parser.setIdentifierMaxLength(config.identifierMaxLength());
-    parser.setConformance(config.conformance());
-    switch (config.quoting()) {
-      case DOUBLE_QUOTE:
-        parser.switchTo("DQID");
-        break;
-      case BACK_TICK:
-        parser.switchTo("BTID");
-        break;
-      case BRACKET:
-        parser.switchTo("DEFAULT");
-        break;
-      default:
-        throw new IllegalArgumentException("Unsupported Quoting type: " + config.quoting());
-    }
+    StringReader reader = new StringReader(sql);
+    SduSqlParserImpl parser = new SduSqlParserImplFactory().getParser(reader);
     return parser.parseSqlStmtList();
   }
-
 
   private static List<SduTable> definedTables(SqlNodeList sqlNodes) {
     if (sqlNodes == null) {
@@ -69,6 +45,17 @@ public class SduSqlParser {
         .collect(Collectors.toList());
   }
 
+  private static List<SduInsert> definedInserts(SqlNodeList sqlNodes) {
+    if (sqlNodes == null) {
+      return Collections.emptyList();
+    }
+    return sqlNodes.getList()
+        .stream()
+        .filter(sqlNode -> sqlNode instanceof SqlInsert)
+        .map(SduInsert::fromSqlInsert)
+        .collect(Collectors.toList());
+  }
+
   public static SduSqlStatement userDefinedSqlStatement(String sql) throws Exception {
     SqlNodeList sqlNodes = parse(sql);
     // 表
@@ -76,7 +63,8 @@ public class SduSqlParser {
     // 函数
     List<SduFunction> sduFunctions = definedFunctions(sqlNodes);
     //
-    return SduSqlStatement.of(sduTables, sduFunctions);
+    List<SduInsert> inserts = definedInserts(sqlNodes);
+    return SduSqlStatement.of(sduTables, sduFunctions, inserts);
   }
 
 }
