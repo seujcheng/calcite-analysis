@@ -4,7 +4,7 @@ import static java.lang.String.valueOf;
 import static org.apache.calcite.config.CalciteConnectionProperty.CASE_SENSITIVE;
 
 import com.google.common.collect.Maps;
-import com.sdu.calcite.catelog.FunctionCatalog;
+import com.sdu.calcite.catelog.SduFunctionCatalog;
 import com.sdu.calcite.catelog.SduFunctionOperatorTable;
 import com.sdu.calcite.catelog.SduCalciteTable;
 import com.sdu.calcite.entry.SduFunction;
@@ -52,7 +52,7 @@ public class SduSqlSyntaxChecker {
   }
 
   private static SqlOperatorTable createSqlOperatorTable(SduTypeFactory typeFactory, List<SduFunction> functions) {
-    FunctionCatalog functionCatalog = new FunctionCatalog();
+    SduFunctionCatalog functionCatalog = new SduFunctionCatalog();
     for (SduFunction sduFunction : functions) {
       functionCatalog.registerUserDefinedFunction(sduFunction.getName(), sduFunction);
     }

@@ -19,10 +19,10 @@ import org.apache.calcite.sql.validate.SqlNameMatcher;
 
 public class SduFunctionOperatorTable implements SqlOperatorTable {
 
-  private final FunctionCatalog functionCatalog;
+  private final SduFunctionCatalog functionCatalog;
   private final SduTypeFactory typeFactory;
 
-  public SduFunctionOperatorTable(FunctionCatalog functionCatalog, SduTypeFactory typeFactory) {
+  public SduFunctionOperatorTable(SduFunctionCatalog functionCatalog, SduTypeFactory typeFactory) {
     this.functionCatalog = functionCatalog;
     this.typeFactory = typeFactory;
   }

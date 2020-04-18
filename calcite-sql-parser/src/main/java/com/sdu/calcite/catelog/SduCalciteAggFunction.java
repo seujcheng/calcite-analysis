@@ -1,8 +1,15 @@
 package com.sdu.calcite.catelog;
 
+import static com.sdu.calcite.util.UserDefinedFunctionUtils.getAccumulateMethod;
+
 import com.sdu.calcite.entry.SduAggregateFunction;
 import com.sdu.calcite.types.SduTypeFactory;
+import com.sdu.calcite.util.UserDefinedFunctionUtils;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlIdentifier;
+import org.apache.calcite.sql.SqlOperatorBinding;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.type.SqlOperandTypeChecker;
 import org.apache.calcite.sql.type.SqlOperandTypeInference;
@@ -41,7 +48,29 @@ public class SduCalciteAggFunction extends SqlUserDefinedAggFunction {
   }
 
   private static SqlReturnTypeInference createReturnTypeInference(SduTypeFactory typeFactory, SduAggregateFunction aggFunction) {
-    throw new RuntimeException();
+
+    class SqlReturnTypeInferenceImpl implements SqlReturnTypeInference {
+
+      private final SduTypeFactory typeFactory;
+      private final SduAggregateFunction aggFunction;
+
+      private SqlReturnTypeInferenceImpl(SduTypeFactory typeFactory, SduAggregateFunction aggFunction) {
+        this.typeFactory = typeFactory;
+        this.aggFunction = aggFunction;
+      }
+
+      @Override
+      public RelDataType inferReturnType(SqlOperatorBinding opBinding) {
+        Class<?>[] parameters = opBinding.collectOperandTypes().stream()
+            .map(typeFactory::getJavaClass)
+            .toArray(Class<?>[]::new);
+
+        Method method = getAccumulateMethod(aggFunction.getUserDefinedFunction(), parameters);
+        return typeFactory.createSqlType(method.getReturnType().getName());
+      }
+    }
+
+    return new SqlReturnTypeInferenceImpl(typeFactory, aggFunction);
   }
 
   private static SqlOperandTypeInference createOperandTypeInference(SduTypeFactory typeFactory, SduAggregateFunction aggFunction) {

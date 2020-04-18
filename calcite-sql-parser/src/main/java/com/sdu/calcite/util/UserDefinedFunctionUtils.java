@@ -54,6 +54,14 @@ public class UserDefinedFunctionUtils {
     return checkAndExtractMethod(definedFunction, "eval", signatures, throwOnFailure);
   }
 
+  public static Method getAccumulateMethod(UserDefinedFunction definedFunction, Class<?>[] signatures) {
+    return getEvalMethod(definedFunction, signatures, true);
+  }
+
+  public static Method getAccumulateMethod(UserDefinedFunction definedFunction, Class<?>[] signatures, boolean throwOnFailure) {
+    return checkAndExtractMethod(definedFunction, "accumulate", signatures, throwOnFailure);
+  }
+
   private static Method checkAndExtractMethod(UserDefinedFunction definedFunction, String methodName, Class<?>[] signatures, boolean throwOnFailure) {
     try {
       Method method = definedFunction.getClass().getMethod(methodName, signatures);
@@ -192,7 +200,7 @@ public class UserDefinedFunctionUtils {
     return new SqlOperandTypeCheckerImpl(typeFactory, function);
   }
 
-  private static Class<?>[] getOperandTypeInfo(SqlCallBinding callBinding, SduTypeFactory typeFactory) {
+  public static Class<?>[] getOperandTypeInfo(SqlCallBinding callBinding, SduTypeFactory typeFactory) {
     return IntStream.range(0, callBinding.getOperandCount())
         .mapToObj(i -> typeFactory.getJavaClass(callBinding.getOperandType(i)))
         .toArray(Class<?>[]::new);

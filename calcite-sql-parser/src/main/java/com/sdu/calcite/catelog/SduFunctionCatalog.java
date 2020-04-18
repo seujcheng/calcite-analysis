@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class FunctionCatalog {
+public class SduFunctionCatalog {
 
   private final Map<String, SduFunction> userDefinedFunctions;
 
-  public FunctionCatalog() {
+  public SduFunctionCatalog() {
     userDefinedFunctions = new HashMap<>();
   }
 
