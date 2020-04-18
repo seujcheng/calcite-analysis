@@ -12,6 +12,7 @@ import com.sdu.calcite.entry.SduFunction;
 import com.sdu.calcite.entry.SduInsert;
 import com.sdu.calcite.entry.SduSqlStatement;
 import com.sdu.calcite.parser.SduCalciteRelBuilder;
+import com.sdu.calcite.parser.SduCalciteSqlOptimizer;
 import com.sdu.calcite.parser.SduCalciteSqlParserFactory;
 import com.sdu.calcite.parser.SduCalciteSqlPlanner;
 import com.sdu.calcite.types.SduCalciteTypeFactory;
@@ -26,6 +27,7 @@ import org.apache.calcite.plan.ConventionTraitDef;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.volcano.VolcanoPlanner;
 import org.apache.calcite.prepare.CalciteCatalogReader;
+import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rex.RexBuilder;
@@ -121,14 +123,15 @@ public class SduCalciteSqlSyntaxChecker {
     SduCalciteTypeFactory typeFactory = new SduCalciteTypeFactory();
     FrameworkConfig config = createFrameworkConfig(typeFactory, sqlStatement);
     SduCalciteRelBuilder relBuilder = createCalciteRelBuilder(config, typeFactory);
-    return new SduCalciteSqlPlanner(config, relBuilder.getPlaner(), typeFactory);
+    return new SduCalciteSqlPlanner(config, relBuilder, typeFactory);
   }
 
-  public static Map<SduInsert, RelRoot> sqlSyntaxValidate(SduSqlStatement sqlStatement) throws SqlParseException {
+  public static Map<SduInsert, RelNode> sqlSyntaxValidate(SduSqlStatement sqlStatement) throws SqlParseException {
     if (sqlStatement.getInserts() == null) return Collections.emptyMap();
     SduCalciteSqlPlanner planner = createSduCalciteSqlPlanner(sqlStatement);
+    SduCalciteSqlOptimizer optimizer = new SduCalciteSqlOptimizer();
 
-    Map<SduInsert, RelRoot> ans = Maps.newHashMap();
+    Map<SduInsert, RelNode> ans = Maps.newHashMap();
     for (SduInsert sduInsert : sqlStatement.getInserts()) {
       if (sduInsert.getSqlNode() == null) {
         SqlNode sqlNode = planner.parse(sduInsert.getSqlText());
@@ -136,7 +139,10 @@ public class SduCalciteSqlSyntaxChecker {
       }
 
       RelRoot relRoot = planner.validateAndRel(sduInsert.getSqlNode());
-      ans.put(sduInsert, relRoot);
+      // 优化语法树
+      RelNode relNode = optimizer.optimize(relRoot.rel, planner.getBuilder());
+
+      ans.put(sduInsert, relNode);
     }
 
     return ans;

@@ -29,13 +29,25 @@ public class SduSqlParserTest {
   }
 
   @Test
-  public void testSql() throws Exception {
+  public void testScalarFunction() throws Exception {
     String path = "/sql.txt";
     String sqlText = readSqlText(path);
     SduSqlStatement statement = SduCalciteSqlParser.userDefinedSqlStatement(sqlText);
-    Map<SduInsert, RelRoot> res = SduCalciteSqlSyntaxChecker.sqlSyntaxValidate(statement);
-    for (Entry<SduInsert, RelRoot> entry : res.entrySet()) {
-      RelNode relNode = entry.getValue().rel;
+    Map<SduInsert, RelNode> res = SduCalciteSqlSyntaxChecker.sqlSyntaxValidate(statement);
+    for (Entry<SduInsert, RelNode> entry : res.entrySet()) {
+      RelNode relNode = entry.getValue();
+      System.out.println(RelOptUtil.toString(relNode));
+    }
+  }
+
+  @Test
+  public void testTopN() throws Exception{
+    String path = "/topN.txt";
+    String sqlText = readSqlText(path);
+    SduSqlStatement statement = SduCalciteSqlParser.userDefinedSqlStatement(sqlText);
+    Map<SduInsert, RelNode> res = SduCalciteSqlSyntaxChecker.sqlSyntaxValidate(statement);
+    for (Entry<SduInsert, RelNode> entry : res.entrySet()) {
+      RelNode relNode = entry.getValue();
       System.out.println(RelOptUtil.toString(relNode));
     }
   }

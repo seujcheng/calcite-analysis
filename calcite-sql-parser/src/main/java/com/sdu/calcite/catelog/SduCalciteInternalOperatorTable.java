@@ -227,6 +227,10 @@ public class SduCalciteInternalOperatorTable extends ReflectiveSqlOperatorTable 
     builtInSqlOperators.add(SduCalciteInternalOperatorTable.SESSION_START);
     builtInSqlOperators.add(SduCalciteInternalOperatorTable.SESSION_END);
 
+    // OVER WINDOW
+    builtInSqlOperators.add(SqlStdOperatorTable.RANK);
+    builtInSqlOperators.add(SqlStdOperatorTable.ROW_NUMBER);
+
   }
 
   public SduCalciteInternalOperatorTable() {

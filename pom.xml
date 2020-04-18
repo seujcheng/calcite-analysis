@@ -12,7 +12,6 @@
     <modules>
         <module>calcite-sql-extend</module>
         <module>calcite-sql-parser</module>
-        <module>calcite-sql-planner</module>
         <module>calcite-sql-function</module>
     </modules>
 

@@ -1,6 +1,5 @@
-package com.sdu.calcite.plan.rules;
+package com.sdu.calcite.rules;
 
-import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelOptTable;
@@ -9,17 +8,17 @@ import org.apache.calcite.rel.logical.LogicalTableScan;
 /**
  * @author hanhan.zhang
  * */
-public class EnumerableTableToFeatureTableScan extends RelOptRule {
+public class EnumerableTableScanConvertRule extends RelOptRule {
 
-  public static final EnumerableTableToFeatureTableScan INSTANCE = new EnumerableTableToFeatureTableScan();
+  public static final EnumerableTableScanConvertRule INSTANCE = new EnumerableTableScanConvertRule();
 
-  private EnumerableTableToFeatureTableScan() {
-    super(operand(EnumerableTableScan.class, any()), "EnumerableTableToFeatureTableScan");
+  private EnumerableTableScanConvertRule() {
+    super(operand(org.apache.calcite.adapter.enumerable.EnumerableTableScan.class, any()), "EnumerableTableScanConvertRule");
   }
 
   @Override
   public void onMatch(final RelOptRuleCall call) {
-    EnumerableTableScan scan = call.rel(0);
+    org.apache.calcite.adapter.enumerable.EnumerableTableScan scan = call.rel(0);
     RelOptTable table = scan.getTable();
     //
     LogicalTableScan newRel = LogicalTableScan.create(scan.getCluster(), table);

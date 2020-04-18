@@ -2,11 +2,11 @@ package com.sdu.calcite.parser;
 
 import java.util.List;
 import java.util.Properties;
+import lombok.Getter;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
 import org.apache.calcite.config.CalciteConnectionProperty;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.plan.RelOptCluster;
-import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.RelOptTable;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.RelRoot;
@@ -23,15 +23,16 @@ import org.apache.calcite.tools.FrameworkConfig;
 public class SduCalciteSqlPlanner {
 
   private final FrameworkConfig frameworkConfig;
-  private final RelOptPlanner planner;
+  @Getter
+  private final SduCalciteRelBuilder builder;
   private final RelDataTypeFactory typeFactory;
 
   private SduCalciteSqlValidator validator;
 
-  public SduCalciteSqlPlanner(FrameworkConfig frameworkConfig, RelOptPlanner planner,
+  public SduCalciteSqlPlanner(FrameworkConfig frameworkConfig, SduCalciteRelBuilder builder,
       RelDataTypeFactory typeFactory) {
     this.frameworkConfig = frameworkConfig;
-    this.planner = planner;
+    this.builder = builder;
     this.typeFactory = typeFactory;
   }
 
@@ -51,7 +52,7 @@ public class SduCalciteSqlPlanner {
 
     // Translate To RelNode
     RexBuilder rexBuilder = new RexBuilder(typeFactory);
-    RelOptCluster cluster = RelOptCluster.create(planner, rexBuilder);
+    RelOptCluster cluster = RelOptCluster.create(builder.getPlaner(), rexBuilder);
     SqlToRelConverter sqlToRelConverter = new SqlToRelConverter(
         new ViewExpanderImpl(),
         validator,
@@ -62,6 +63,8 @@ public class SduCalciteSqlPlanner {
 
     return sqlToRelConverter.convertQuery(sqlNode, true, true);
   }
+
+
 
   private static class ViewExpanderImpl implements RelOptTable.ViewExpander {
 
