@@ -5,7 +5,7 @@ import com.sdu.calcite.entry.SduFunction;
 import com.sdu.calcite.entry.SduScalarFunction;
 import com.sdu.calcite.entry.SduTableFunction;
 import com.sdu.calcite.function.FunctionKind;
-import com.sdu.calcite.types.SduTypeFactory;
+import com.sdu.calcite.types.SduCalciteTypeFactory;
 import com.sdu.calcite.util.UserDefinedFunctionUtils;
 import java.util.List;
 import java.util.Optional;
@@ -17,12 +17,12 @@ import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.SqlSyntax;
 import org.apache.calcite.sql.validate.SqlNameMatcher;
 
-public class SduFunctionOperatorTable implements SqlOperatorTable {
+public class SduCalciteFunctionOperatorTable implements SqlOperatorTable {
 
-  private final SduFunctionCatalog functionCatalog;
-  private final SduTypeFactory typeFactory;
+  private final SduCalciteFunctionCatalog functionCatalog;
+  private final SduCalciteTypeFactory typeFactory;
 
-  public SduFunctionOperatorTable(SduFunctionCatalog functionCatalog, SduTypeFactory typeFactory) {
+  public SduCalciteFunctionOperatorTable(SduCalciteFunctionCatalog functionCatalog, SduCalciteTypeFactory typeFactory) {
     this.functionCatalog = functionCatalog;
     this.typeFactory = typeFactory;
   }
@@ -53,7 +53,7 @@ public class SduFunctionOperatorTable implements SqlOperatorTable {
     return category != null && !category.isUserDefinedNotSpecificFunction();
   }
 
-  private static Optional<SqlFunction> convertToSqlFunction(SduTypeFactory typeFactory, String name, SduFunction function) {
+  private static Optional<SqlFunction> convertToSqlFunction(SduCalciteTypeFactory typeFactory, String name, SduFunction function) {
     FunctionKind kind = function.getKind();
     switch (kind) {
       case TABLE:

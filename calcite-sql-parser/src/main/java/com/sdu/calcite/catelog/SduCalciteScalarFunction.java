@@ -5,7 +5,7 @@ import static com.sdu.calcite.util.UserDefinedFunctionUtils.createEvalOperandTyp
 import static com.sdu.calcite.util.UserDefinedFunctionUtils.getEvalMethod;
 
 import com.sdu.calcite.entry.SduScalarFunction;
-import com.sdu.calcite.types.SduTypeFactory;
+import com.sdu.calcite.types.SduCalciteTypeFactory;
 import java.lang.reflect.Method;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlFunction;
@@ -19,7 +19,7 @@ public class SduCalciteScalarFunction extends SqlFunction {
 
   private final SduScalarFunction function;
 
-  public SduCalciteScalarFunction(SduTypeFactory typeFactory, String name, SduScalarFunction function) {
+  public SduCalciteScalarFunction(SduCalciteTypeFactory typeFactory, String name, SduScalarFunction function) {
     super(
         new SqlIdentifier(name, SqlParserPos.ZERO),
         createReturnTypeInference(typeFactory, function),
@@ -37,14 +37,14 @@ public class SduCalciteScalarFunction extends SqlFunction {
     return function.isDeterministic();
   }
 
-  private static SqlReturnTypeInference createReturnTypeInference(SduTypeFactory typeFactory, SduScalarFunction function) {
+  private static SqlReturnTypeInference createReturnTypeInference(SduCalciteTypeFactory typeFactory, SduScalarFunction function) {
 
     class ScalarFunctionReturnTypeInference implements SqlReturnTypeInference {
 
-      private final SduTypeFactory typeFactory;
+      private final SduCalciteTypeFactory typeFactory;
       private final SduScalarFunction function;
 
-      private ScalarFunctionReturnTypeInference(SduTypeFactory typeFactory, SduScalarFunction function) {
+      private ScalarFunctionReturnTypeInference(SduCalciteTypeFactory typeFactory, SduScalarFunction function) {
         this.typeFactory = typeFactory;
         this.function = function;
       }

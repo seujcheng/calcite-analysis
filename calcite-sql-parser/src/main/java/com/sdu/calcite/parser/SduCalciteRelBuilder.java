@@ -6,9 +6,9 @@ import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.RelOptSchema;
 import org.apache.calcite.tools.RelBuilder;
 
-public class SduRelBuilder extends RelBuilder {
+public class SduCalciteRelBuilder extends RelBuilder {
 
-  public SduRelBuilder(Context context, RelOptCluster cluster, RelOptSchema relOptSchema) {
+  public SduCalciteRelBuilder(Context context, RelOptCluster cluster, RelOptSchema relOptSchema) {
     super(context, cluster, relOptSchema);
   }
 

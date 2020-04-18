@@ -4,7 +4,7 @@ import static com.sdu.calcite.util.UserDefinedFunctionUtils.createEvalOperandTyp
 import static com.sdu.calcite.util.UserDefinedFunctionUtils.createEvalOperandTypeInference;
 
 import com.sdu.calcite.entry.SduTableFunction;
-import com.sdu.calcite.types.SduTypeFactory;
+import com.sdu.calcite.types.SduCalciteTypeFactory;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.type.ReturnTypes;
@@ -16,9 +16,9 @@ public class SduCalciteTableFunction extends SqlUserDefinedTableFunction {
 
   public SduCalciteTableFunction(
       String name,
-      SduTypeFactory typeFactory,
+      SduCalciteTypeFactory typeFactory,
       SduTableFunction sduTableFunction,
-      SduTableFunctionImpl functionImpl) {
+      SduCalciteTableFunctionImpl functionImpl) {
     super(
         new SqlIdentifier(name, SqlParserPos.ZERO),
         ReturnTypes.CURSOR,

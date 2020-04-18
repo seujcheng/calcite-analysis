@@ -5,7 +5,7 @@ import static java.lang.String.format;
 import com.sdu.calcite.catelog.SduCalciteAggFunction;
 import com.sdu.calcite.catelog.SduCalciteScalarFunction;
 import com.sdu.calcite.catelog.SduCalciteTableFunction;
-import com.sdu.calcite.catelog.SduTableFunctionImpl;
+import com.sdu.calcite.catelog.SduCalciteTableFunctionImpl;
 import com.sdu.calcite.entry.SduAggregateFunction;
 import com.sdu.calcite.entry.SduFunction;
 import com.sdu.calcite.entry.SduScalarFunction;
@@ -13,7 +13,7 @@ import com.sdu.calcite.entry.SduTableFunction;
 import com.sdu.calcite.function.FunctionKind;
 import com.sdu.calcite.function.TableFunction;
 import com.sdu.calcite.function.UserDefinedFunction;
-import com.sdu.calcite.types.SduTypeFactory;
+import com.sdu.calcite.types.SduCalciteTypeFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -32,17 +32,17 @@ public class UserDefinedFunctionUtils {
   private UserDefinedFunctionUtils() {
   }
 
-  public static SqlFunction convertTableSqlFunction(SduTypeFactory typeFactory, String name, SduTableFunction tableFunction) {
+  public static SqlFunction convertTableSqlFunction(SduCalciteTypeFactory typeFactory, String name, SduTableFunction tableFunction) {
     TableFunction<?> function = tableFunction.getTableFunction();
-    SduTableFunctionImpl functionImpl = new SduTableFunctionImpl(function.getColumnNames(), function.getColumnTypes());
+    SduCalciteTableFunctionImpl functionImpl = new SduCalciteTableFunctionImpl(function.getColumnNames(), function.getColumnTypes());
     return new SduCalciteTableFunction(name, typeFactory, tableFunction, functionImpl);
   }
 
-  public static SqlFunction convertScalarSqlFunction(SduTypeFactory typeFactory, String name, SduScalarFunction scalarFunction) {
+  public static SqlFunction convertScalarSqlFunction(SduCalciteTypeFactory typeFactory, String name, SduScalarFunction scalarFunction) {
     return new SduCalciteScalarFunction(typeFactory, name, scalarFunction);
   }
 
-  public static SqlFunction convertAggregateFunction(SduTypeFactory typeFactory, String name, SduAggregateFunction aggFunction) {
+  public static SqlFunction convertAggregateFunction(SduCalciteTypeFactory typeFactory, String name, SduAggregateFunction aggFunction) {
     return new SduCalciteAggFunction(name, typeFactory, aggFunction);
   }
 
@@ -101,14 +101,15 @@ public class UserDefinedFunctionUtils {
     return methods;
   }
 
-  public static SqlOperandTypeInference createEvalOperandTypeInference(SduTypeFactory typeFactory, SduFunction function) {
+  public static SqlOperandTypeInference createEvalOperandTypeInference(
+      SduCalciteTypeFactory typeFactory, SduFunction function) {
 
     class SqlOperandTypeInferenceImpl implements SqlOperandTypeInference {
 
-      private final SduTypeFactory typeFactory;
+      private final SduCalciteTypeFactory typeFactory;
       private final SduFunction function;
 
-      private SqlOperandTypeInferenceImpl(SduTypeFactory typeFactory, SduFunction function) {
+      private SqlOperandTypeInferenceImpl(SduCalciteTypeFactory typeFactory, SduFunction function) {
         this.typeFactory = typeFactory;
         this.function = function;
       }
@@ -131,16 +132,16 @@ public class UserDefinedFunctionUtils {
     return new SqlOperandTypeInferenceImpl(typeFactory, function);
   }
 
-  public static SqlOperandTypeChecker createEvalOperandTypeChecker(SduTypeFactory typeFactory, SduFunction function) {
+  public static SqlOperandTypeChecker createEvalOperandTypeChecker(SduCalciteTypeFactory typeFactory, SduFunction function) {
 
     class SqlOperandTypeCheckerImpl implements SqlOperandTypeChecker {
 
-      private final SduTypeFactory typeFactory;
+      private final SduCalciteTypeFactory typeFactory;
       private final SduFunction function;
 
       private final Method[] methods;
 
-      private SqlOperandTypeCheckerImpl(SduTypeFactory typeFactory, SduFunction function) {
+      private SqlOperandTypeCheckerImpl(SduCalciteTypeFactory typeFactory, SduFunction function) {
         this.typeFactory = typeFactory;
         this.function = function;
         this.methods = checkAndExtractMethods(function.getUserDefinedFunction(), "eval");
@@ -200,7 +201,7 @@ public class UserDefinedFunctionUtils {
     return new SqlOperandTypeCheckerImpl(typeFactory, function);
   }
 
-  public static Class<?>[] getOperandTypeInfo(SqlCallBinding callBinding, SduTypeFactory typeFactory) {
+  public static Class<?>[] getOperandTypeInfo(SqlCallBinding callBinding, SduCalciteTypeFactory typeFactory) {
     return IntStream.range(0, callBinding.getOperandCount())
         .mapToObj(i -> typeFactory.getJavaClass(callBinding.getOperandType(i)))
         .toArray(Class<?>[]::new);

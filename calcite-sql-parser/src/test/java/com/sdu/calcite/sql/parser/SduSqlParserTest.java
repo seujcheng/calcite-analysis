@@ -4,8 +4,8 @@ import static java.lang.String.format;
 
 import com.sdu.calcite.entry.SduInsert;
 import com.sdu.calcite.entry.SduSqlStatement;
-import com.sdu.calcite.util.SduSqlParser;
-import com.sdu.calcite.util.SduSqlSyntaxChecker;
+import com.sdu.calcite.util.SduCalciteSqlParser;
+import com.sdu.calcite.util.SduCalciteSqlSyntaxChecker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -32,8 +32,8 @@ public class SduSqlParserTest {
   public void testSql() throws Exception {
     String path = "/sql.txt";
     String sqlText = readSqlText(path);
-    SduSqlStatement statement = SduSqlParser.userDefinedSqlStatement(sqlText);
-    Map<SduInsert, RelRoot> res = SduSqlSyntaxChecker.sqlSyntaxValidate(statement);
+    SduSqlStatement statement = SduCalciteSqlParser.userDefinedSqlStatement(sqlText);
+    Map<SduInsert, RelRoot> res = SduCalciteSqlSyntaxChecker.sqlSyntaxValidate(statement);
     for (Entry<SduInsert, RelRoot> entry : res.entrySet()) {
       RelNode relNode = entry.getValue().rel;
       System.out.println(RelOptUtil.toString(relNode));

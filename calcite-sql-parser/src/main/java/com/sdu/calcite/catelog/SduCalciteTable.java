@@ -2,7 +2,7 @@ package com.sdu.calcite.catelog;
 
 import com.sdu.calcite.entry.SduOption;
 import com.sdu.calcite.entry.SduTableColumn;
-import com.sdu.calcite.types.SduTypeFactory;
+import com.sdu.calcite.types.SduCalciteTypeFactory;
 import java.util.List;
 import java.util.Map;
 import org.apache.calcite.rel.type.RelDataType;
@@ -23,7 +23,7 @@ public class SduCalciteTable extends AbstractTable {
 
   @Override
   public RelDataType getRowType(RelDataTypeFactory typeFactory) {
-    SduTypeFactory sduTypeFactory = (SduTypeFactory) typeFactory;
+    SduCalciteTypeFactory sduTypeFactory = (SduCalciteTypeFactory) typeFactory;
 
     RelDataTypeFactory.Builder builder = new Builder(typeFactory);
 

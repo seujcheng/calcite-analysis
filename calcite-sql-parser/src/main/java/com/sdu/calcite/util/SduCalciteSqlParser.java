@@ -4,7 +4,7 @@ import com.sdu.calcite.entry.SduFunction;
 import com.sdu.calcite.entry.SduInsert;
 import com.sdu.calcite.entry.SduSqlStatement;
 import com.sdu.calcite.entry.SduTable;
-import com.sdu.calcite.parser.SduSqlParserImplFactory;
+import com.sdu.calcite.parser.SduCalciteSqlParserFactory;
 import com.sdu.calcite.sql.ddl.SqlCreateFunction;
 import com.sdu.calcite.sql.ddl.SqlCreateTable;
 import com.sdu.calcite.sql.parser.SduSqlParserImpl;
@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 import org.apache.calcite.sql.SqlInsert;
 import org.apache.calcite.sql.SqlNodeList;
 
-public class SduSqlParser {
+public class SduCalciteSqlParser {
 
   private static SqlNodeList parse(String sql) throws Exception {
     StringReader reader = new StringReader(sql);
-    SduSqlParserImpl parser = new SduSqlParserImplFactory().getParser(reader);
+    SduSqlParserImpl parser = new SduCalciteSqlParserFactory().getParser(reader);
     return parser.parseSqlStmtList();
   }
 

@@ -12,11 +12,7 @@ import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.util.ConversionUtil;
 
-public class SduTypeFactory extends JavaTypeFactoryImpl {
-
-  RelDataType createTypeFromClass(Class<?> cls) {
-    return createSqlType(cls.getName());
-  }
+public class SduCalciteTypeFactory extends JavaTypeFactoryImpl {
 
   public RelDataType createSqlType(String typeName) {
     switch (typeName) {

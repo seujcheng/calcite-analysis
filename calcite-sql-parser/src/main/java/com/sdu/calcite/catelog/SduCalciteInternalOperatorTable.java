@@ -1,4 +1,4 @@
-package com.sdu.calcite.util;
+package com.sdu.calcite.catelog;
 
 import static org.apache.calcite.sql.type.OperandTypes.DATETIME_INTERVAL;
 import static org.apache.calcite.sql.type.OperandTypes.DATETIME_INTERVAL_INTERVAL;
@@ -15,7 +15,7 @@ import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.type.OperandTypes;
 import org.apache.calcite.sql.util.ReflectiveSqlOperatorTable;
 
-class SduBasicOperatorTable extends ReflectiveSqlOperatorTable {
+public class SduCalciteInternalOperatorTable extends ReflectiveSqlOperatorTable {
 
   // 翻转窗口
   private static final SqlGroupedWindowFunction TUMBLE = new SqlGroupedWindowFunction(
@@ -217,19 +217,19 @@ class SduBasicOperatorTable extends ReflectiveSqlOperatorTable {
     builtInSqlOperators.add(SqlStdOperatorTable.RUNNING);
 
     // WINDOW
-    builtInSqlOperators.add(SduBasicOperatorTable.TUMBLE);
-    builtInSqlOperators.add(SduBasicOperatorTable.TUMBLE_START);
-    builtInSqlOperators.add(SduBasicOperatorTable.TUMBLE_END);
-    builtInSqlOperators.add(SduBasicOperatorTable.HOP);
-    builtInSqlOperators.add(SduBasicOperatorTable.HOP_START);
-    builtInSqlOperators.add(SduBasicOperatorTable.HOP_END);
-    builtInSqlOperators.add(SduBasicOperatorTable.SESSION);
-    builtInSqlOperators.add(SduBasicOperatorTable.SESSION_START);
-    builtInSqlOperators.add(SduBasicOperatorTable.SESSION_END);
+    builtInSqlOperators.add(SduCalciteInternalOperatorTable.TUMBLE);
+    builtInSqlOperators.add(SduCalciteInternalOperatorTable.TUMBLE_START);
+    builtInSqlOperators.add(SduCalciteInternalOperatorTable.TUMBLE_END);
+    builtInSqlOperators.add(SduCalciteInternalOperatorTable.HOP);
+    builtInSqlOperators.add(SduCalciteInternalOperatorTable.HOP_START);
+    builtInSqlOperators.add(SduCalciteInternalOperatorTable.HOP_END);
+    builtInSqlOperators.add(SduCalciteInternalOperatorTable.SESSION);
+    builtInSqlOperators.add(SduCalciteInternalOperatorTable.SESSION_START);
+    builtInSqlOperators.add(SduCalciteInternalOperatorTable.SESSION_END);
 
   }
 
-  SduBasicOperatorTable() {
+  public SduCalciteInternalOperatorTable() {
     builtInSqlOperators.forEach(this::register);
   }
 

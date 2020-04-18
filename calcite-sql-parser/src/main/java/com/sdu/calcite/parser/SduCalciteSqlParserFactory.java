@@ -6,7 +6,7 @@ import org.apache.calcite.config.Lex;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserImplFactory;
 
-public class SduSqlParserImplFactory implements SqlParserImplFactory {
+public class SduCalciteSqlParserFactory implements SqlParserImplFactory {
 
   @Override
   public SduSqlParserImpl getParser(Reader stream) {
