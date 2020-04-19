@@ -12,7 +12,7 @@ public class SduCalciteRelBuilder extends RelBuilder {
     super(context, cluster, relOptSchema);
   }
 
-  public RelOptPlanner getPlaner() {
+  RelOptPlanner getPlaner() {
     return cluster.getPlanner();
   }
 
