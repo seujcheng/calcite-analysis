@@ -1,9 +1,8 @@
-package com.sdu.calcite.parser;
+package com.sdu.calcite;
 
-import static com.sdu.calcite.util.SduCalciteHepPlanner.runHepPlannerSequentially;
-import static com.sdu.calcite.util.SduCalciteHepPlanner.runHepPlannerSimultaneously;
+import static com.sdu.calcite.SduCalciteHepPlanner.runHepPlannerSequentially;
+import static com.sdu.calcite.SduCalciteHepPlanner.runHepPlannerSimultaneously;
 
-import com.sdu.calcite.util.SduCalciteRuleSets;
 import org.apache.calcite.plan.hep.HepMatchOrder;
 import org.apache.calcite.rel.RelNode;
 

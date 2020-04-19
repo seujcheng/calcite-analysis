@@ -1,4 +1,4 @@
-package com.sdu.calcite.entry;
+package com.sdu.sql.entry;
 
 import java.util.List;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.sdu.calcite.util;
+package com.sdu.calcite;
 
 import com.sdu.calcite.rules.EnumerableTableScanConvertRule;
 import com.sdu.calcite.rules.LogicalCorrelateToTemporalTableJoinRule;

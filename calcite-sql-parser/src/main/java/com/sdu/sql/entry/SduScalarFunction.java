@@ -1,4 +1,4 @@
-package com.sdu.calcite.entry;
+package com.sdu.sql.entry;
 
 import com.sdu.calcite.function.FunctionKind;
 import com.sdu.calcite.function.ScalarFunction;

@@ -1,6 +1,6 @@
 package com.sdu.calcite.catelog;
 
-import com.sdu.calcite.entry.SduFunction;
+import com.sdu.sql.entry.SduFunction;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package com.sdu.calcite.util;
+package com.sdu.calcite;
 
 import static java.lang.String.valueOf;
 import static org.apache.calcite.config.CalciteConnectionProperty.CASE_SENSITIVE;
@@ -8,14 +8,15 @@ import com.sdu.calcite.catelog.SduCalciteFunctionCatalog;
 import com.sdu.calcite.catelog.SduCalciteFunctionOperatorTable;
 import com.sdu.calcite.catelog.SduCalciteInternalOperatorTable;
 import com.sdu.calcite.catelog.SduCalciteTable;
-import com.sdu.calcite.entry.SduFunction;
-import com.sdu.calcite.entry.SduInsert;
-import com.sdu.calcite.entry.SduSqlStatement;
-import com.sdu.calcite.parser.SduCalciteRelBuilder;
-import com.sdu.calcite.parser.SduCalciteSqlOptimizer;
-import com.sdu.calcite.parser.SduCalciteSqlParserFactory;
-import com.sdu.calcite.parser.SduCalciteSqlPlanner;
-import com.sdu.calcite.types.SduCalciteTypeFactory;
+import com.sdu.sql.entry.SduFunction;
+import com.sdu.sql.entry.SduInsert;
+import com.sdu.sql.entry.SduSqlStatement;
+import com.sdu.calcite.SduCalciteRelBuilder;
+import com.sdu.calcite.SduCalciteSqlOptimizer;
+import com.sdu.calcite.SduCalciteSqlParserFactory;
+import com.sdu.calcite.SduCalciteSqlPlanner;
+import com.sdu.calcite.SduCalciteTypeFactory;
+import com.sdu.sql.entry.SduTable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +47,9 @@ public class SduCalciteSqlSyntaxChecker {
 
   }
 
-  private static CalciteSchema createCalciteSchema(List<com.sdu.calcite.entry.SduTable> tables) {
+  private static CalciteSchema createCalciteSchema(List<SduTable> tables) {
     CalciteSchema schema = CalciteSchema.createRootSchema(false, false);
-    for (com.sdu.calcite.entry.SduTable table : tables) {
+    for (SduTable table : tables) {
       schema.add(table.getName(), new SduCalciteTable(table.getColumns(), table.getProperties()));
     }
     return schema;

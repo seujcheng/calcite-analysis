@@ -1,10 +1,10 @@
 package com.sdu.calcite.catelog;
 
-import static com.sdu.calcite.util.UserDefinedFunctionUtils.createEvalOperandTypeChecker;
-import static com.sdu.calcite.util.UserDefinedFunctionUtils.createEvalOperandTypeInference;
+import static com.sdu.sql.parse.UserDefinedFunctionUtils.createEvalOperandTypeChecker;
+import static com.sdu.sql.parse.UserDefinedFunctionUtils.createEvalOperandTypeInference;
 
-import com.sdu.calcite.entry.SduTableFunction;
-import com.sdu.calcite.types.SduCalciteTypeFactory;
+import com.sdu.sql.entry.SduTableFunction;
+import com.sdu.calcite.SduCalciteTypeFactory;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.type.ReturnTypes;

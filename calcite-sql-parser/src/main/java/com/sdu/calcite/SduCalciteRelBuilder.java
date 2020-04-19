@@ -1,4 +1,4 @@
-package com.sdu.calcite.parser;
+package com.sdu.calcite;
 
 import org.apache.calcite.plan.Context;
 import org.apache.calcite.plan.RelOptCluster;

@@ -1,4 +1,4 @@
-package com.sdu.calcite.parser;
+package com.sdu.calcite;
 
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.sql.SqlOperatorTable;

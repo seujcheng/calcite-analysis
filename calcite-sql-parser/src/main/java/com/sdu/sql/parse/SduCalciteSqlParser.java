@@ -1,10 +1,10 @@
-package com.sdu.calcite.util;
+package com.sdu.sql.parse;
 
-import com.sdu.calcite.entry.SduFunction;
-import com.sdu.calcite.entry.SduInsert;
-import com.sdu.calcite.entry.SduSqlStatement;
-import com.sdu.calcite.entry.SduTable;
-import com.sdu.calcite.parser.SduCalciteSqlParserFactory;
+import com.sdu.sql.entry.SduFunction;
+import com.sdu.sql.entry.SduInsert;
+import com.sdu.sql.entry.SduSqlStatement;
+import com.sdu.sql.entry.SduTable;
+import com.sdu.calcite.SduCalciteSqlParserFactory;
 import com.sdu.calcite.sql.ddl.SqlCreateFunction;
 import com.sdu.calcite.sql.ddl.SqlCreateTable;
 import com.sdu.calcite.sql.parser.SduSqlParserImpl;

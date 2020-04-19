@@ -1,9 +1,9 @@
 package com.sdu.calcite.catelog;
 
-import static com.sdu.calcite.util.UserDefinedFunctionUtils.getAccumulateMethod;
+import static com.sdu.sql.parse.UserDefinedFunctionUtils.getAccumulateMethod;
 
-import com.sdu.calcite.entry.SduAggregateFunction;
-import com.sdu.calcite.types.SduCalciteTypeFactory;
+import com.sdu.sql.entry.SduAggregateFunction;
+import com.sdu.calcite.SduCalciteTypeFactory;
 import java.lang.reflect.Method;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlIdentifier;

@@ -1,4 +1,4 @@
-package com.sdu.calcite.parser;
+package com.sdu.calcite;
 
 import java.util.List;
 import java.util.Properties;

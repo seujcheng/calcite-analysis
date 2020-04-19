@@ -2,17 +2,16 @@ package com.sdu.calcite.sql.parser;
 
 import static java.lang.String.format;
 
-import com.sdu.calcite.entry.SduInsert;
-import com.sdu.calcite.entry.SduSqlStatement;
-import com.sdu.calcite.util.SduCalciteSqlParser;
-import com.sdu.calcite.util.SduCalciteSqlSyntaxChecker;
+import com.sdu.sql.entry.SduInsert;
+import com.sdu.sql.entry.SduSqlStatement;
+import com.sdu.sql.parse.SduCalciteSqlParser;
+import com.sdu.calcite.SduCalciteSqlSyntaxChecker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.RelRoot;
 import org.junit.Test;
 
 public class SduSqlParserTest {

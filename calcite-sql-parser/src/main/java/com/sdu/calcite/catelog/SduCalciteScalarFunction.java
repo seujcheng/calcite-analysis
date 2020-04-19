@@ -1,11 +1,11 @@
 package com.sdu.calcite.catelog;
 
-import static com.sdu.calcite.util.UserDefinedFunctionUtils.createEvalOperandTypeChecker;
-import static com.sdu.calcite.util.UserDefinedFunctionUtils.createEvalOperandTypeInference;
-import static com.sdu.calcite.util.UserDefinedFunctionUtils.getEvalMethod;
+import static com.sdu.sql.parse.UserDefinedFunctionUtils.createEvalOperandTypeChecker;
+import static com.sdu.sql.parse.UserDefinedFunctionUtils.createEvalOperandTypeInference;
+import static com.sdu.sql.parse.UserDefinedFunctionUtils.getEvalMethod;
 
-import com.sdu.calcite.entry.SduScalarFunction;
-import com.sdu.calcite.types.SduCalciteTypeFactory;
+import com.sdu.sql.entry.SduScalarFunction;
+import com.sdu.calcite.SduCalciteTypeFactory;
 import java.lang.reflect.Method;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlFunction;

@@ -1,12 +1,12 @@
 package com.sdu.calcite.catelog;
 
-import com.sdu.calcite.entry.SduAggregateFunction;
-import com.sdu.calcite.entry.SduFunction;
-import com.sdu.calcite.entry.SduScalarFunction;
-import com.sdu.calcite.entry.SduTableFunction;
+import com.sdu.sql.entry.SduAggregateFunction;
+import com.sdu.sql.entry.SduFunction;
+import com.sdu.sql.entry.SduScalarFunction;
+import com.sdu.sql.entry.SduTableFunction;
 import com.sdu.calcite.function.FunctionKind;
-import com.sdu.calcite.types.SduCalciteTypeFactory;
-import com.sdu.calcite.util.UserDefinedFunctionUtils;
+import com.sdu.calcite.SduCalciteTypeFactory;
+import com.sdu.sql.parse.UserDefinedFunctionUtils;
 import java.util.List;
 import java.util.Optional;
 import org.apache.calcite.sql.SqlFunction;

@@ -1,4 +1,4 @@
-package com.sdu.calcite.entry;
+package com.sdu.sql.entry;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashSet;

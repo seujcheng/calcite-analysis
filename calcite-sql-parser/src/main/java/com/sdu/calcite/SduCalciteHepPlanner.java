@@ -1,4 +1,4 @@
-package com.sdu.calcite.util;
+package com.sdu.calcite;
 
 import com.google.common.collect.Lists;
 import org.apache.calcite.plan.RelOptRule;

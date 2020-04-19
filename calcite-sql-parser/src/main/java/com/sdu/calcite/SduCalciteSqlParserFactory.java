@@ -1,4 +1,4 @@
-package com.sdu.calcite.parser;
+package com.sdu.calcite;
 
 import com.sdu.calcite.sql.parser.SduSqlParserImpl;
 import java.io.Reader;
