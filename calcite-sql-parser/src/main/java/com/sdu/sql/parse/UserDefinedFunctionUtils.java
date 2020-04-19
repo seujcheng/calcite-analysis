@@ -6,7 +6,7 @@ import com.sdu.calcite.catelog.SduCalciteAggFunction;
 import com.sdu.calcite.catelog.SduCalciteScalarFunction;
 import com.sdu.calcite.catelog.SduCalciteTableFunction;
 import com.sdu.calcite.catelog.SduCalciteTableFunctionImpl;
-import com.sdu.sql.entry.SduAggregateFunction;
+import com.sdu.sql.entry.SduAggFunction;
 import com.sdu.sql.entry.SduFunction;
 import com.sdu.sql.entry.SduScalarFunction;
 import com.sdu.sql.entry.SduTableFunction;
@@ -42,7 +42,7 @@ public class UserDefinedFunctionUtils {
     return new SduCalciteScalarFunction(typeFactory, name, scalarFunction);
   }
 
-  public static SqlFunction convertAggregateFunction(SduCalciteTypeFactory typeFactory, String name, SduAggregateFunction aggFunction) {
+  public static SqlFunction convertAggregateFunction(SduCalciteTypeFactory typeFactory, String name, SduAggFunction aggFunction) {
     return new SduCalciteAggFunction(name, typeFactory, aggFunction);
   }
 

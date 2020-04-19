@@ -2,7 +2,7 @@ package com.sdu.calcite.catelog;
 
 import static com.sdu.sql.parse.UserDefinedFunctionUtils.getAccumulateMethod;
 
-import com.sdu.sql.entry.SduAggregateFunction;
+import com.sdu.sql.entry.SduAggFunction;
 import com.sdu.calcite.SduCalciteTypeFactory;
 import java.lang.reflect.Method;
 import org.apache.calcite.rel.type.RelDataType;
@@ -17,12 +17,12 @@ import org.apache.calcite.util.Optionality;
 
 public class SduCalciteAggFunction extends SqlUserDefinedAggFunction {
 
-  private final SduAggregateFunction aggregateFunction;
+  private final SduAggFunction aggregateFunction;
 
   public SduCalciteAggFunction(
       String name,
       SduCalciteTypeFactory typeFactory,
-      SduAggregateFunction aggFunction) {
+      SduAggFunction aggFunction) {
     super(
         new SqlIdentifier(name, SqlParserPos.ZERO),
         createReturnTypeInference(typeFactory, aggFunction),
@@ -45,14 +45,14 @@ public class SduCalciteAggFunction extends SqlUserDefinedAggFunction {
     return aggregateFunction.isDeterministic();
   }
 
-  private static SqlReturnTypeInference createReturnTypeInference(SduCalciteTypeFactory typeFactory, SduAggregateFunction aggFunction) {
+  private static SqlReturnTypeInference createReturnTypeInference(SduCalciteTypeFactory typeFactory, SduAggFunction aggFunction) {
 
     class SqlReturnTypeInferenceImpl implements SqlReturnTypeInference {
 
       private final SduCalciteTypeFactory typeFactory;
-      private final SduAggregateFunction aggFunction;
+      private final SduAggFunction aggFunction;
 
-      private SqlReturnTypeInferenceImpl(SduCalciteTypeFactory typeFactory, SduAggregateFunction aggFunction) {
+      private SqlReturnTypeInferenceImpl(SduCalciteTypeFactory typeFactory, SduAggFunction aggFunction) {
         this.typeFactory = typeFactory;
         this.aggFunction = aggFunction;
       }
@@ -72,11 +72,11 @@ public class SduCalciteAggFunction extends SqlUserDefinedAggFunction {
   }
 
   private static SqlOperandTypeInference createOperandTypeInference(
-      SduCalciteTypeFactory typeFactory, SduAggregateFunction aggFunction) {
+      SduCalciteTypeFactory typeFactory, SduAggFunction aggFunction) {
     throw new RuntimeException();
   }
 
-  private static SqlOperandTypeChecker createOperandTypeChecker(SduCalciteTypeFactory typeFactory, SduAggregateFunction aggFunction) {
+  private static SqlOperandTypeChecker createOperandTypeChecker(SduCalciteTypeFactory typeFactory, SduAggFunction aggFunction) {
     throw new RuntimeException();
   }
 }

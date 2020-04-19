@@ -80,7 +80,7 @@ public abstract class SduFunction {
 
         case AGGREGATE:
           AggregateFunction<?, ?> aggregateFunction = (AggregateFunction<?, ?>) definedFunction;
-          return SduAggregateFunction.fromUserDefinedFunction(aggregateFunction);
+          return SduAggFunction.fromUserDefinedFunction(aggregateFunction);
 
         default:
           throw new UnsupportedOperationException("Unsupported function kind, kind: " + definedFunction.getKind());

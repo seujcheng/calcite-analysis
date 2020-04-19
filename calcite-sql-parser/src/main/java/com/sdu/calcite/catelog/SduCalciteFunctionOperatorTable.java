@@ -1,6 +1,6 @@
 package com.sdu.calcite.catelog;
 
-import com.sdu.sql.entry.SduAggregateFunction;
+import com.sdu.sql.entry.SduAggFunction;
 import com.sdu.sql.entry.SduFunction;
 import com.sdu.sql.entry.SduScalarFunction;
 import com.sdu.sql.entry.SduTableFunction;
@@ -63,7 +63,7 @@ public class SduCalciteFunctionOperatorTable implements SqlOperatorTable {
         SduScalarFunction scalarFunction = (SduScalarFunction) function;
         return Optional.of(UserDefinedFunctionUtils.convertScalarSqlFunction(typeFactory, name, scalarFunction));
       case AGGREGATE:
-        SduAggregateFunction aggFunction = (SduAggregateFunction) function;
+        SduAggFunction aggFunction = (SduAggFunction) function;
         return Optional.of(UserDefinedFunctionUtils.convertAggregateFunction(typeFactory, name, aggFunction));
       default:
         throw new RuntimeException("Unsupported sql function kind: " + kind);

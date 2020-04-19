@@ -6,7 +6,7 @@ import com.sdu.calcite.function.UserDefinedFunction;
 import lombok.Data;
 
 @Data
-public class SduAggregateFunction extends SduFunction {
+public class SduAggFunction extends SduFunction {
 
   private AggregateFunction<?, ?> aggregateFunction;
   private boolean requiresOver;
@@ -21,12 +21,12 @@ public class SduAggregateFunction extends SduFunction {
     return FunctionKind.AGGREGATE;
   }
 
-  static SduAggregateFunction fromUserDefinedFunction(AggregateFunction<?, ?> function) {
-    SduAggregateFunction sduAggregateFunction = new SduAggregateFunction();
-    sduAggregateFunction.setAggregateFunction(function);
-    sduAggregateFunction.setDeterministic(function.isDeterministic());
-    sduAggregateFunction.setRequiresOver(function.requiresOver());
-    return sduAggregateFunction;
+  static SduAggFunction fromUserDefinedFunction(AggregateFunction<?, ?> function) {
+    SduAggFunction sduAggFunction = new SduAggFunction();
+    sduAggFunction.setAggregateFunction(function);
+    sduAggFunction.setDeterministic(function.isDeterministic());
+    sduAggFunction.setRequiresOver(function.requiresOver());
+    return sduAggFunction;
   }
 
 }
