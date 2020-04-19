@@ -29,7 +29,7 @@ public class SduCalciteSqlPlanner {
 
   private SduCalciteSqlValidator validator;
 
-  public SduCalciteSqlPlanner(FrameworkConfig frameworkConfig, SduCalciteRelBuilder builder,
+  SduCalciteSqlPlanner(FrameworkConfig frameworkConfig, SduCalciteRelBuilder builder,
       RelDataTypeFactory typeFactory) {
     this.frameworkConfig = frameworkConfig;
     this.builder = builder;

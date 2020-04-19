@@ -6,9 +6,9 @@ import org.apache.calcite.sql.validate.SqlConformance;
 import org.apache.calcite.sql.validate.SqlValidatorCatalogReader;
 import org.apache.calcite.sql.validate.SqlValidatorImpl;
 
-class SduCalciteSqlValidator extends SqlValidatorImpl {
+public class SduCalciteSqlValidator extends SqlValidatorImpl {
 
-  SduCalciteSqlValidator(
+  public SduCalciteSqlValidator(
       SqlOperatorTable opTab,
       SqlValidatorCatalogReader catalogReader,
       RelDataTypeFactory typeFactory,

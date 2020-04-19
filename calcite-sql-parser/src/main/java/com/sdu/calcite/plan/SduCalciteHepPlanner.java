@@ -1,4 +1,4 @@
-package com.sdu.calcite;
+package com.sdu.calcite.plan;
 
 import com.google.common.collect.Lists;
 import org.apache.calcite.plan.RelOptRule;
@@ -38,7 +38,7 @@ public class SduCalciteHepPlanner {
    * and only then apply the next rule. If a rule creates a new node preceding rules will not
    * be applied to the newly created node.
    * */
-  public static RelNode runHepPlannerSequentially(
+  static RelNode runHepPlannerSequentially(
       HepMatchOrder hepMatchOrder,
       RuleSet ruleSet,
       RelNode input,

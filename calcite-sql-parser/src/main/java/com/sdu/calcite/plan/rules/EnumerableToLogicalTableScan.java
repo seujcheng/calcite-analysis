@@ -1,5 +1,6 @@
-package com.sdu.calcite.rules;
+package com.sdu.calcite.plan.rules;
 
+import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelOptTable;
@@ -8,12 +9,12 @@ import org.apache.calcite.rel.logical.LogicalTableScan;
 /**
  * @author hanhan.zhang
  * */
-public class EnumerableTableScanConvertRule extends RelOptRule {
+public class EnumerableToLogicalTableScan extends RelOptRule {
 
-  public static final EnumerableTableScanConvertRule INSTANCE = new EnumerableTableScanConvertRule();
+  public static final EnumerableToLogicalTableScan INSTANCE = new EnumerableToLogicalTableScan();
 
-  private EnumerableTableScanConvertRule() {
-    super(operand(org.apache.calcite.adapter.enumerable.EnumerableTableScan.class, any()), "EnumerableTableScanConvertRule");
+  private EnumerableToLogicalTableScan() {
+    super(operand(EnumerableTableScan.class, any()), "EnumerableToLogicalTableScan");
   }
 
   @Override

@@ -6,6 +6,7 @@ import com.sdu.sql.entry.SduScalarFunction;
 import com.sdu.sql.entry.SduTableFunction;
 import com.sdu.calcite.function.FunctionKind;
 import com.sdu.calcite.SduCalciteTypeFactory;
+import com.sdu.sql.parse.SduFunctionCatalog;
 import com.sdu.sql.parse.UserDefinedFunctionUtils;
 import java.util.List;
 import java.util.Optional;
@@ -19,10 +20,10 @@ import org.apache.calcite.sql.validate.SqlNameMatcher;
 
 public class SduCalciteFunctionOperatorTable implements SqlOperatorTable {
 
-  private final SduCalciteFunctionCatalog functionCatalog;
+  private final SduFunctionCatalog functionCatalog;
   private final SduCalciteTypeFactory typeFactory;
 
-  public SduCalciteFunctionOperatorTable(SduCalciteFunctionCatalog functionCatalog, SduCalciteTypeFactory typeFactory) {
+  public SduCalciteFunctionOperatorTable(SduCalciteTypeFactory typeFactory, SduFunctionCatalog functionCatalog) {
     this.functionCatalog = functionCatalog;
     this.typeFactory = typeFactory;
   }

@@ -8,11 +8,11 @@ import org.apache.calcite.tools.RelBuilder;
 
 public class SduCalciteRelBuilder extends RelBuilder {
 
-  public SduCalciteRelBuilder(Context context, RelOptCluster cluster, RelOptSchema relOptSchema) {
+  SduCalciteRelBuilder(Context context, RelOptCluster cluster, RelOptSchema relOptSchema) {
     super(context, cluster, relOptSchema);
   }
 
-  RelOptPlanner getPlaner() {
+  public RelOptPlanner getPlaner() {
     return cluster.getPlanner();
   }
 

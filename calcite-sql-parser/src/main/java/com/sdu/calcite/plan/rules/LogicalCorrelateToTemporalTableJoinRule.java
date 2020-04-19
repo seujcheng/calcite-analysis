@@ -1,4 +1,4 @@
-package com.sdu.calcite.rules;
+package com.sdu.calcite.plan.rules;
 
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;

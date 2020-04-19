@@ -4,18 +4,12 @@ import static java.lang.String.valueOf;
 import static org.apache.calcite.config.CalciteConnectionProperty.CASE_SENSITIVE;
 
 import com.google.common.collect.Maps;
-import com.sdu.calcite.catelog.SduCalciteFunctionCatalog;
 import com.sdu.calcite.catelog.SduCalciteFunctionOperatorTable;
 import com.sdu.calcite.catelog.SduCalciteInternalOperatorTable;
 import com.sdu.calcite.catelog.SduCalciteTable;
-import com.sdu.sql.entry.SduFunction;
+import com.sdu.calcite.plan.SduCalciteSqlOptimizer;
 import com.sdu.sql.entry.SduInsert;
 import com.sdu.sql.entry.SduSqlStatement;
-import com.sdu.calcite.SduCalciteRelBuilder;
-import com.sdu.calcite.SduCalciteSqlOptimizer;
-import com.sdu.calcite.SduCalciteSqlParserFactory;
-import com.sdu.calcite.SduCalciteSqlPlanner;
-import com.sdu.calcite.SduCalciteTypeFactory;
 import com.sdu.sql.entry.SduTable;
 import java.util.Collections;
 import java.util.List;
@@ -55,44 +49,35 @@ public class SduCalciteSqlSyntaxChecker {
     return schema;
   }
 
-  private static SqlOperatorTable createSqlOperatorTable(SduCalciteTypeFactory typeFactory, List<SduFunction> functions) {
-    SduCalciteFunctionCatalog functionCatalog = new SduCalciteFunctionCatalog();
-    for (SduFunction sduFunction : functions) {
-      functionCatalog.registerUserDefinedFunction(sduFunction.getName(), sduFunction);
-    }
-    return ChainedSqlOperatorTable.of(new SduCalciteInternalOperatorTable(),
-        new SduCalciteFunctionOperatorTable(functionCatalog, typeFactory));
-  }
+  private static FrameworkConfig createFrameworkConfig(SduCalciteTypeFactory typeFactory, SduSqlStatement sqlStatement) {
+    // register table schema
+    CalciteSchema schema = createCalciteSchema(sqlStatement.getTables());
 
+    // register function schema
+    SqlOperatorTable functionOperatorTable = ChainedSqlOperatorTable.of(new SduCalciteInternalOperatorTable(),
+        new SduCalciteFunctionOperatorTable(typeFactory, sqlStatement.getFunctionCatalog()));
 
-  private static SqlParser.Config createSqlParserConfig() {
-    return SqlParser.configBuilder()
+    // sql parser config
+    SqlParser.Config parserConf = SqlParser.configBuilder()
         // 禁止转为大写
         .setUnquotedCasing(Casing.UNCHANGED)
         .setParserFactory(new SduCalciteSqlParserFactory())
         .build();
-  }
 
-  private static SqlToRelConverter.Config createSqlToRelConverterConfig() {
-    return SqlToRelConverter.configBuilder()
+    // SqlNode Convert RelNode Config
+    SqlToRelConverter.Config sqlToRelConvertConf = SqlToRelConverter.configBuilder()
         .withTrimUnusedFields(false)
         // TableScan --> LogicalTableScan(即: TableScan类型是LogicalTableScan)
         .withConvertTableAccess(false)
         .withInSubQueryThreshold(Integer.MAX_VALUE)
         .build();
-  }
 
-  private static FrameworkConfig createFrameworkConfig(SduCalciteTypeFactory typeFactory, SduSqlStatement sqlStatement) {
-    // register table schema
-    CalciteSchema schema = createCalciteSchema(sqlStatement.getTables());
-    // register function schema
-    SqlOperatorTable operatorTable = createSqlOperatorTable(typeFactory, sqlStatement.getFunctions());
     return Frameworks.newConfigBuilder()
         .defaultSchema(schema.plus())
-        .parserConfig(createSqlParserConfig())
+        .parserConfig(parserConf)
         .typeSystem(typeFactory.getTypeSystem())
-        .operatorTable(operatorTable)
-        .sqlToRelConverterConfig(createSqlToRelConverterConfig())
+        .operatorTable(functionOperatorTable)
+        .sqlToRelConverterConfig(sqlToRelConvertConf)
         .build();
   }
 
@@ -111,7 +96,7 @@ public class SduCalciteSqlSyntaxChecker {
   private static SduCalciteRelBuilder createCalciteRelBuilder(FrameworkConfig frameworkConfig, SduCalciteTypeFactory typeFactory) {
     VolcanoPlanner planner = new VolcanoPlanner();
     planner.addRelTraitDef(ConventionTraitDef.INSTANCE);
-    RelOptCluster cluster = RelOptCluster.create(planner, new RexBuilder(typeFactory));
+    RelOptCluster cluster = SduRelOptClusterFactory.create(planner, new RexBuilder(typeFactory));
     CalciteSchema calciteSchema = CalciteSchema.from(frameworkConfig.getDefaultSchema());
     CalciteCatalogReader relOptSchema = createCatalogReader(
         calciteSchema, Collections.emptyList(), typeFactory,
@@ -127,10 +112,14 @@ public class SduCalciteSqlSyntaxChecker {
     return new SduCalciteSqlPlanner(config, relBuilder, typeFactory);
   }
 
-  public static Map<SduInsert, RelNode> sqlSyntaxValidate(SduSqlStatement sqlStatement) throws SqlParseException {
-    if (sqlStatement.getInserts() == null) return Collections.emptyMap();
+  public static Map<SduInsert, RelNode> sqlSyntaxOptimizer(SduSqlStatement sqlStatement,
+      SduCalciteSqlOptimizer optimizer) throws SqlParseException {
+
+    if (sqlStatement.getInserts() == null) {
+      return Collections.emptyMap();
+    }
+
     SduCalciteSqlPlanner planner = createSduCalciteSqlPlanner(sqlStatement);
-    SduCalciteSqlOptimizer optimizer = new SduCalciteSqlOptimizer();
 
     Map<SduInsert, RelNode> ans = Maps.newHashMap();
     for (SduInsert sduInsert : sqlStatement.getInserts()) {

@@ -2,6 +2,9 @@ package com.sdu.calcite.sql.parser;
 
 import static java.lang.String.format;
 
+import com.sdu.calcite.SduCalciteConfig;
+import com.sdu.calcite.SduCalciteConfigBuilder;
+import com.sdu.calcite.plan.SduCalciteSqlOptimizer;
 import com.sdu.sql.entry.SduInsert;
 import com.sdu.sql.entry.SduSqlStatement;
 import com.sdu.sql.parse.SduCalciteSqlParser;
@@ -12,9 +15,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
+import org.junit.Before;
 import org.junit.Test;
 
 public class SduSqlParserTest {
+
+  private SduCalciteSqlOptimizer optimizer;
 
   private static String readSqlText(String name) throws IOException {
     InputStream stream = SduSqlParserTest.class.getResourceAsStream(name);
@@ -27,12 +33,18 @@ public class SduSqlParserTest {
     return new String(content);
   }
 
+  @Before
+  public void setup() {
+    SduCalciteConfig calciteConfig = SduCalciteConfigBuilder.builder().build();
+    optimizer = new SduCalciteSqlOptimizer(calciteConfig);
+  }
+
   @Test
   public void testScalarFunction() throws Exception {
     String path = "/sql.txt";
     String sqlText = readSqlText(path);
     SduSqlStatement statement = SduCalciteSqlParser.userDefinedSqlStatement(sqlText);
-    Map<SduInsert, RelNode> res = SduCalciteSqlSyntaxChecker.sqlSyntaxValidate(statement);
+    Map<SduInsert, RelNode> res = SduCalciteSqlSyntaxChecker.sqlSyntaxOptimizer(statement, optimizer);
     for (Entry<SduInsert, RelNode> entry : res.entrySet()) {
       RelNode relNode = entry.getValue();
       System.out.println(RelOptUtil.toString(relNode));
@@ -44,7 +56,7 @@ public class SduSqlParserTest {
     String path = "/topN.txt";
     String sqlText = readSqlText(path);
     SduSqlStatement statement = SduCalciteSqlParser.userDefinedSqlStatement(sqlText);
-    Map<SduInsert, RelNode> res = SduCalciteSqlSyntaxChecker.sqlSyntaxValidate(statement);
+    Map<SduInsert, RelNode> res = SduCalciteSqlSyntaxChecker.sqlSyntaxOptimizer(statement, optimizer);
     for (Entry<SduInsert, RelNode> entry : res.entrySet()) {
       RelNode relNode = entry.getValue();
       System.out.println(RelOptUtil.toString(relNode));

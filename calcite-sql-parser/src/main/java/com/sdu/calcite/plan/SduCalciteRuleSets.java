@@ -1,7 +1,7 @@
-package com.sdu.calcite;
+package com.sdu.calcite.plan;
 
-import com.sdu.calcite.rules.EnumerableTableScanConvertRule;
-import com.sdu.calcite.rules.LogicalCorrelateToTemporalTableJoinRule;
+import com.sdu.calcite.plan.rules.EnumerableToLogicalTableScan;
+import com.sdu.calcite.plan.rules.LogicalCorrelateToTemporalTableJoinRule;
 import org.apache.calcite.rel.core.RelFactories;
 import org.apache.calcite.rel.rules.AggregateJoinTransposeRule;
 import org.apache.calcite.rel.rules.AggregateProjectMergeRule;
@@ -38,13 +38,13 @@ import org.apache.calcite.rel.rules.UnionToDistinctRule;
 import org.apache.calcite.tools.RuleSet;
 import org.apache.calcite.tools.RuleSets;
 
-public class SduCalciteRuleSets {
+class SduCalciteRuleSets {
 
 
   /**
    * Convert sub-queries before query decorrelation.
    * */
-  public static RuleSet TABLE_SUBQUERY_RULES = RuleSets.ofList(
+  static RuleSet TABLE_SUBQUERY_RULES = RuleSets.ofList(
       SubQueryRemoveRule.FILTER,
       SubQueryRemoveRule.PROJECT,
       SubQueryRemoveRule.JOIN);
@@ -53,11 +53,14 @@ public class SduCalciteRuleSets {
    * Expand plan by replacing references to tables into a proper plan sub trees. Those rules
    * can create new plan nodes.
    */
-  public static RuleSet EXPAND_PLAN_RULES = RuleSets.ofList(
+  static RuleSet EXPAND_PLAN_RULES = RuleSets.ofList(
       LogicalCorrelateToTemporalTableJoinRule.INSTANCE,
       TableScanRule.INSTANCE);
 
-  public static RuleSet SDU_NORM_RULES = RuleSets.ofList(
+  static RuleSet POST_EXPAND_CLEAN_UP_RULES = RuleSets.ofList(
+    EnumerableToLogicalTableScan.INSTANCE);
+
+  static RuleSet SDU_NORM_RULES = RuleSets.ofList(
       ReduceExpressionsRule.FILTER_INSTANCE,
       ReduceExpressionsRule.PROJECT_INSTANCE,
       ReduceExpressionsRule.CALC_INSTANCE,
@@ -65,7 +68,7 @@ public class SduCalciteRuleSets {
       ProjectToWindowRule.PROJECT
   );
 
-  public static RuleSet LOGICAL_OPT_RULES = RuleSets.ofList(
+  static RuleSet LOGICAL_OPT_RULES = RuleSets.ofList(
       // push a filter into a join
       FilterJoinRule.FILTER_ON_JOIN,
       // push filter into the children of a join
@@ -133,8 +136,7 @@ public class SduCalciteRuleSets {
   );
 
 
-  public static RuleSet LOGICAL_REWRITE_RULES = RuleSets.ofList(
-      EnumerableTableScanConvertRule.INSTANCE,
+  static RuleSet LOGICAL_REWRITE_RULES = RuleSets.ofList(
       CalcMergeRule.INSTANCE
   );
 
