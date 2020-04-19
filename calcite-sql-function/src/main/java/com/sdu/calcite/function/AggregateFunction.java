@@ -8,6 +8,8 @@ public abstract class AggregateFunction<T, ACC> extends UserDefinedFunction {
 
   public abstract Class<T> getResultType();
 
+  public abstract Class<ACC> getAccumulatorType();
+
   @Override
   public FunctionKind getKind() {
     return FunctionKind.AGGREGATE;

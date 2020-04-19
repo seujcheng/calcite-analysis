@@ -1,15 +1,17 @@
 package com.sdu.calcite.entry;
 
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
 public class SduSqlStatement {
 
+  @Getter
   private List<SduTable> tables;
 
+  @Getter
   private List<SduFunction> functions;
 
+  @Getter
   private List<SduInsert> inserts;
 
   private SduSqlStatement(List<SduTable> tables, List<SduFunction> functions, List<SduInsert> inserts) {

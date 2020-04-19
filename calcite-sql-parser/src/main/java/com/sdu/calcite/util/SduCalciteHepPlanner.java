@@ -54,6 +54,7 @@ public class SduCalciteHepPlanner {
 
 
   private static RelNode runHepPlanner(HepProgram hepProgram, RelNode input, RelTraitSet targetTraits) {
+    // TODO: 可通过Context在优化规则中获取传入的参数信息, 具体可以参考FlinkLogicalRankRuleBase使用
     HepPlanner planner = new HepPlanner(hepProgram);
     planner.setRoot(input);
     if (input.getTraitSet() != targetTraits) {

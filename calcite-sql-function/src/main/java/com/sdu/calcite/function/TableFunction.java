@@ -2,7 +2,7 @@ package com.sdu.calcite.function;
 
 public abstract class TableFunction<T> extends UserDefinedFunction {
 
-  public abstract void collect(T row);
+  public abstract void emit(T row);
 
   public abstract String[] getColumnNames();
 
