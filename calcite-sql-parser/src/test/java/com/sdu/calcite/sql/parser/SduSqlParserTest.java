@@ -3,12 +3,12 @@ package com.sdu.calcite.sql.parser;
 import static java.lang.String.format;
 
 import com.sdu.calcite.SduCalciteConfig;
-import com.sdu.calcite.SduCalciteConfigBuilder;
+import com.sdu.calcite.SduCalciteRuleSetConfigBuilder;
+import com.sdu.calcite.SduCalciteSqlSyntaxChecker;
 import com.sdu.calcite.plan.SduCalciteSqlOptimizer;
 import com.sdu.sql.entry.SduInsert;
 import com.sdu.sql.entry.SduSqlStatement;
 import com.sdu.sql.parse.SduCalciteSqlParser;
-import com.sdu.calcite.SduCalciteSqlSyntaxChecker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -35,8 +35,8 @@ public class SduSqlParserTest {
 
   @Before
   public void setup() {
-    SduCalciteConfig calciteConfig = SduCalciteConfigBuilder.builder().build();
-    optimizer = new SduCalciteSqlOptimizer(calciteConfig);
+    SduCalciteConfig config = () -> SduCalciteRuleSetConfigBuilder.builder().build();
+    optimizer = new SduCalciteSqlOptimizer(config);
   }
 
   @Test

@@ -8,7 +8,7 @@ import org.apache.calcite.plan.RelTrait;
 import org.apache.calcite.tools.RuleSet;
 import org.apache.calcite.tools.RuleSets;
 
-public class SduCalciteConfigBuilder {
+public class SduCalciteRuleSetConfigBuilder {
 
   private boolean replacesNormRuleSet;
   private List<RelOptRule> normRuleSet;
@@ -22,20 +22,20 @@ public class SduCalciteConfigBuilder {
   private RelTrait physicalRelTrait;
   private List<RelOptRule> physicalRuleSet;
 
-  private SduCalciteConfigBuilder() {
+  private SduCalciteRuleSetConfigBuilder() {
 
   }
 
-  public static SduCalciteConfigBuilder builder() {
-    return new SduCalciteConfigBuilder();
+  public static SduCalciteRuleSetConfigBuilder builder() {
+    return new SduCalciteRuleSetConfigBuilder();
   }
 
-  public SduCalciteConfigBuilder setReplacesNormRuleSet(boolean replacesNormRuleSet) {
+  public SduCalciteRuleSetConfigBuilder setReplacesNormRuleSet(boolean replacesNormRuleSet) {
     this.replacesNormRuleSet = replacesNormRuleSet;
     return this;
   }
 
-  public SduCalciteConfigBuilder addNormRelOptRule(RelOptRule ... rules) {
+  public SduCalciteRuleSetConfigBuilder addNormRelOptRule(RelOptRule ... rules) {
     if (normRuleSet == null) {
       normRuleSet = new LinkedList<>();
     }
@@ -43,12 +43,12 @@ public class SduCalciteConfigBuilder {
     return this;
   }
 
-  public SduCalciteConfigBuilder setReplacesLogicalOptRuleSet(boolean replacesLogicalOptRuleSet) {
+  public SduCalciteRuleSetConfigBuilder setReplacesLogicalOptRuleSet(boolean replacesLogicalOptRuleSet) {
     this.replacesLogicalOptRuleSet = replacesLogicalOptRuleSet;
     return this;
   }
 
-  public SduCalciteConfigBuilder addLogicalRelOptRule(RelOptRule ... rules) {
+  public SduCalciteRuleSetConfigBuilder addLogicalRelOptRule(RelOptRule ... rules) {
     if (logicalOptRuleSet == null) {
       logicalOptRuleSet = new LinkedList<>();
     }
@@ -56,12 +56,12 @@ public class SduCalciteConfigBuilder {
     return this;
   }
 
-  public SduCalciteConfigBuilder setReplacesLogicalRewriteRuleSet(boolean replacesLogicalRewriteRuleSet) {
+  public SduCalciteRuleSetConfigBuilder setReplacesLogicalRewriteRuleSet(boolean replacesLogicalRewriteRuleSet) {
     this.replacesLogicalRewriteRuleSet = replacesLogicalRewriteRuleSet;
     return this;
   }
 
-  public SduCalciteConfigBuilder addReplacesLogicalRewriteRelOptRule(RelOptRule ... rules) {
+  public SduCalciteRuleSetConfigBuilder addReplacesLogicalRewriteRelOptRule(RelOptRule ... rules) {
     if (logicalRewriteRuleSet == null) {
       logicalRewriteRuleSet = new LinkedList<>();
     }
@@ -69,12 +69,12 @@ public class SduCalciteConfigBuilder {
     return this;
   }
 
-  public SduCalciteConfigBuilder setPhysicalRelTrait(RelTrait physicalRelTrait) {
+  public SduCalciteRuleSetConfigBuilder setPhysicalRelTrait(RelTrait physicalRelTrait) {
     this.physicalRelTrait = physicalRelTrait;
     return this;
   }
 
-  public SduCalciteConfigBuilder addPhysicaleRelOptRule(RelOptRule ... rules) {
+  public SduCalciteRuleSetConfigBuilder addPhysicaleRelOptRule(RelOptRule ... rules) {
     if (physicalRuleSet == null) {
       physicalRuleSet = new LinkedList<>();
     }
@@ -82,15 +82,15 @@ public class SduCalciteConfigBuilder {
     return this;
   }
 
-  public SduCalciteConfig build() {
-    return new SduCalciteConfigImpl(
+  public SduCalciteRuleSetConfig build() {
+    return new SduCalciteRuleSetConfigImpl(
         replacesNormRuleSet, normRuleSet,
         replacesLogicalOptRuleSet, logicalOptRuleSet,
         replacesLogicalRewriteRuleSet, logicalRewriteRuleSet,
         physicalRelTrait, physicalRuleSet);
   }
 
-  private static class SduCalciteConfigImpl implements SduCalciteConfig {
+  private static class SduCalciteRuleSetConfigImpl implements SduCalciteRuleSetConfig {
 
     private final boolean replacesNormRuleSet;
     private final RuleSet normRuleSet;
@@ -104,7 +104,7 @@ public class SduCalciteConfigBuilder {
     private final RelTrait physicalRelTrait;
     private final RuleSet physicalRuleSet;
 
-    private SduCalciteConfigImpl(
+    private SduCalciteRuleSetConfigImpl(
         boolean replacesNormRuleSet, List<RelOptRule> normRuleSet,
         boolean replacesLogicalOptRuleSet, List<RelOptRule> logicalOptRuleSet,
         boolean replacesLogicalRewriteRuleSet, List<RelOptRule> logicalRewriteRuleSet,
