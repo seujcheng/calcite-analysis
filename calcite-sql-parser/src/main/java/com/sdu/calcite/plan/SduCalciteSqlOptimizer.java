@@ -74,8 +74,8 @@ public class SduCalciteSqlOptimizer {
     RuleSet logicalRuleSet = ofRuleSet(conf.getLogicalOptRuleSet(), LOGICAL_OPT_RULES, conf.replacesLogicalOptRuleSet());
 
     // TODO: 2020-04-19 这里缺少Convention, VolcanoPlaner无法优化, 待排查
-
-//    return runVolcanoPlanner(logicalRuleSet, input, input.getTraitSet(), builder.getPlaner());
+    SduCalciteRelBuilder builder = context.unwrap(SduCalciteRelBuilder.class);
+    runVolcanoPlanner(logicalRuleSet, input, input.getTraitSet(), builder.getPlaner());
 
     return runHepPlannerSequentially(HepMatchOrder.TOP_DOWN, logicalRuleSet,
         input, input.getTraitSet(), context);

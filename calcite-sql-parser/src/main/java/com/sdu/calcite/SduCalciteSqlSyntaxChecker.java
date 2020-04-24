@@ -3,6 +3,7 @@ package com.sdu.calcite;
 import static java.lang.String.valueOf;
 import static org.apache.calcite.config.CalciteConnectionProperty.CASE_SENSITIVE;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.sdu.calcite.catelog.SduCalciteFunctionOperatorTable;
 import com.sdu.calcite.catelog.SduCalciteInternalOperatorTable;
@@ -20,6 +21,7 @@ import org.apache.calcite.config.CalciteConnectionConfigImpl;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.plan.ConventionTraitDef;
 import org.apache.calcite.plan.RelOptCluster;
+import org.apache.calcite.plan.RelTraitDef;
 import org.apache.calcite.plan.volcano.VolcanoPlanner;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.RelNode;
@@ -72,12 +74,16 @@ public class SduCalciteSqlSyntaxChecker {
         .withInSubQueryThreshold(Integer.MAX_VALUE)
         .build();
 
+    // 构建RelNode默认特征
+    List<RelTraitDef> traitDefs = ImmutableList.of(ConventionTraitDef.INSTANCE);
+
     return Frameworks.newConfigBuilder()
         .defaultSchema(schema.plus())
         .parserConfig(parserConf)
         .typeSystem(typeFactory.getTypeSystem())
         .operatorTable(functionOperatorTable)
         .sqlToRelConverterConfig(sqlToRelConvertConf)
+        .traitDefs(traitDefs)
         .build();
   }
 
@@ -95,7 +101,10 @@ public class SduCalciteSqlSyntaxChecker {
 
   private static SduCalciteRelBuilder createCalciteRelBuilder(FrameworkConfig frameworkConfig, SduCalciteTypeFactory typeFactory) {
     VolcanoPlanner planner = new VolcanoPlanner();
-    planner.addRelTraitDef(ConventionTraitDef.INSTANCE);
+    // 指定构建RelNode时添加的默认特征
+    for (RelTraitDef traitDef :frameworkConfig.getTraitDefs()) {
+      planner.addRelTraitDef(traitDef);
+    }
     RelOptCluster cluster = SduRelOptClusterFactory.create(planner, new RexBuilder(typeFactory));
     CalciteSchema calciteSchema = CalciteSchema.from(frameworkConfig.getDefaultSchema());
     CalciteCatalogReader relOptSchema = createCatalogReader(
@@ -114,7 +123,7 @@ public class SduCalciteSqlSyntaxChecker {
 
   public static Map<SduInsert, RelNode> sqlSyntaxOptimizer(SduSqlStatement sqlStatement,
       SduCalciteSqlOptimizer optimizer) throws SqlParseException {
-
+    // TODO: VolcanoPlanner Context
     if (sqlStatement.getInserts() == null) {
       return Collections.emptyMap();
     }

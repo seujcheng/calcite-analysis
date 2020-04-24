@@ -138,6 +138,10 @@ class SduCalciteHepPlanner {
      *
      *        RelOptRuleCall包含了节点优化的上下文信息, 节点优化的后结果也记录在该对象中
      *
+     * 3: RelNode的唯一标识
+     *
+     *    在SQL语法树种, 每个RelNode节点的唯一标识可有RelNode.getDigest()和RelNode.getRowType()两者决定
+     *
      * */
     return planner.findBestExp();
   }
