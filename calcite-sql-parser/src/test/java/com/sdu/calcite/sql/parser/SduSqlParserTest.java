@@ -40,6 +40,18 @@ public class SduSqlParserTest {
   }
 
   @Test
+  public void testSimpleFunction() throws Exception {
+    String path = "/simple.txt";
+    String sqlText = readSqlText(path);
+    SduSqlStatement statement = SduCalciteSqlParser.userDefinedSqlStatement(sqlText);
+    Map<SduInsert, RelNode> res = SduCalciteSqlSyntaxChecker.sqlSyntaxOptimizer(statement, optimizer);
+    for (Entry<SduInsert, RelNode> entry : res.entrySet()) {
+      RelNode relNode = entry.getValue();
+      System.out.println(RelOptUtil.toString(relNode));
+    }
+  }
+
+  @Test
   public void testScalarFunction() throws Exception {
     String path = "/sql.txt";
     String sqlText = readSqlText(path);

@@ -9,6 +9,8 @@ import com.sdu.calcite.catelog.SduCalciteFunctionOperatorTable;
 import com.sdu.calcite.catelog.SduCalciteInternalOperatorTable;
 import com.sdu.calcite.catelog.SduCalciteTable;
 import com.sdu.calcite.plan.SduCalciteSqlOptimizer;
+import com.sdu.calcite.plan.SduCalciteSqlPlanner;
+import com.sdu.calcite.plan.cost.SduRelOptCostFactory;
 import com.sdu.sql.entry.SduInsert;
 import com.sdu.sql.entry.SduSqlStatement;
 import com.sdu.sql.entry.SduTable;
@@ -80,6 +82,7 @@ public class SduCalciteSqlSyntaxChecker {
     return Frameworks.newConfigBuilder()
         .defaultSchema(schema.plus())
         .parserConfig(parserConf)
+        .costFactory(new SduRelOptCostFactory())
         .typeSystem(typeFactory.getTypeSystem())
         .operatorTable(functionOperatorTable)
         .sqlToRelConverterConfig(sqlToRelConvertConf)
