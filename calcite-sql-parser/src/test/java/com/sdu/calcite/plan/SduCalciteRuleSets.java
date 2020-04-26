@@ -1,4 +1,4 @@
-package com.sdu.calcite.sql.plan;
+package com.sdu.calcite.plan;
 
 import com.sdu.calcite.plan.rules.EnumerableToLogicalTableScan;
 import com.sdu.calcite.plan.rules.LogicalCorrelateToTemporalTableJoinRule;

@@ -1,11 +1,11 @@
-package com.sdu.calcite.sql.parser;
+package com.sdu.calcite.sql;
 
 import com.sdu.calcite.SduCalciteConfig;
 import com.sdu.calcite.SduCalciteConfigImpl;
 import com.sdu.calcite.SduPlanner;
 import com.sdu.calcite.plan.SduCalciteOptimizer;
 import com.sdu.calcite.plan.SduCalcitePlanningConfigBuilder;
-import com.sdu.calcite.sql.plan.SduCalciteOptimizerTest;
+import com.sdu.calcite.plan.SduCalciteOptimizerTest;
 import com.sdu.sql.entry.SduInsert;
 import com.sdu.sql.entry.SduSqlStatement;
 import com.sdu.sql.parse.SduCalciteSqlParser;

@@ -1,4 +1,4 @@
-package com.sdu.calcite.sql.parser;
+package com.sdu.calcite.sql;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;

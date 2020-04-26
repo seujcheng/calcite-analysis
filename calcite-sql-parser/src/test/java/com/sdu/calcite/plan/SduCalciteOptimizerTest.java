@@ -1,7 +1,8 @@
-package com.sdu.calcite.sql.plan;
+package com.sdu.calcite.plan;
 
 import com.sdu.calcite.plan.SduCalciteOptimizer;
 import com.sdu.calcite.plan.SduCalcitePlanningConfigBuilder;
+import com.sdu.calcite.sql.plan.SduCalciteRuleSets;
 import org.apache.calcite.plan.hep.HepMatchOrder;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.sql2rel.RelDecorrelator;
@@ -43,9 +44,8 @@ public class SduCalciteOptimizerTest extends SduCalciteOptimizer {
   }
 
   private RelNode optimizeLogicalPlan(RelNode input) {
-    // TODO: 2020-04-19 这里缺少Convention, VolcanoPlaner无法优化, 待排查
-//    SduCalciteRelBuilder builder = context.unwrap(SduCalciteRelBuilder.class);
-//    runVolcanoPlanner(logicalRuleSet, input, input.getTraitSet(), builder.getPlaner());
+    // TODO: RelNode需要重写computeSelfCost(), 计算节点代价, 否则优化失败
+    runVolcanoPlanner(SduCalciteRuleSets.LOGICAL_OPT_RULES, input, input.getTraitSet());
 
     return runHepPlannerSequentially(HepMatchOrder.TOP_DOWN,
         SduCalciteRuleSets.LOGICAL_OPT_RULES, input, input.getTraitSet());

@@ -17,6 +17,12 @@ import org.apache.calcite.tools.Programs;
 import org.apache.calcite.tools.RelBuilder;
 import org.apache.calcite.tools.RuleSet;
 
+/*
+ * 1: 关系表达式(RelNode)若可被Calcite Planner优化, 则必须有特征(RelTrait): ConventionTraitDef
+ *
+ * 2: 关系表达式(RelNode)的默认的特征(RelTrait), 可在VolcanoPlanner构建时添加
+ *
+ * */
 public abstract class SduCalciteOptimizer {
 
   private final SduCalcitePlanningConfigBuilder calcitePlanningConfigBuilder;
@@ -27,11 +33,38 @@ public abstract class SduCalciteOptimizer {
 
   public abstract RelNode optimize(RelNode relNode, RelBuilder relBuilder);
 
-  protected RelNode runVolcanoPlanner(RelNode input, RuleSet ruleSet, RelTraitSet targetTraits, RelOptPlanner planner) {
+  protected RelNode runVolcanoPlanner(RuleSet ruleSet, RelNode input, RelTraitSet targetTraits) {
+    RelOptPlanner planner = calcitePlanningConfigBuilder.getPlanner();
     /*
      * https://zhuanlan.zhihu.com/p/48735419
      *
      * VolcanoPlanner是基于成本的优化算法, 通过剪枝和缓冲中间结果(动态规划)的方法降低计算消耗
+     *
+     * 1: RelSet
+     *
+     *    RelSet描述的是等价的关系表达式(RelNode)集合, 比如: 关系表达式A(RelNode)在规则(RelOptRule)优化下转为关系表达式B, 那么
+     *
+     *    关系表达式A和关系表达式B视为等价的
+     *
+     * 2: RelSubSet
+     *
+     *    RelSubSet描述的是关系表达式具有相同属性信息(RelTrait)的集合
+     *
+     * 3: VolcanoPlanner.setRoot()
+     *
+     *    初始化关系表达式(RelNode)的等价关系集合(RelSet)
+     *
+     *                 Syntax Tree                    =====>>      Equivalence-Set Of Expressions
+     *
+     *                 Project(#3)
+     *                    /|\
+     *                     |
+     *          +----------+---------+
+     *          |                    |
+     *          |                    |
+     *      TableScan(#1)      TableScan(#2)
+     *
+     * 4: VolcanoPlanner.findBestExp()
      *
      *
      * */
@@ -74,7 +107,6 @@ public abstract class SduCalciteOptimizer {
     }
     return runHepPlanner(builder.build(), input, targetTraits);
   }
-
 
 
   private RelNode runHepPlanner(
@@ -141,7 +173,7 @@ public abstract class SduCalciteOptimizer {
      *
      *             假如优化规则A: left join -> right join, 优化规则B: right join -> left join, 则会导致死循环
      *
-     * 2: 优化规节点
+     * 2: 优化节点
      *
      *    2.1 RelOptRule
      *

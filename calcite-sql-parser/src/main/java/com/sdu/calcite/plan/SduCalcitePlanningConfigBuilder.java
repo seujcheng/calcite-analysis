@@ -127,7 +127,6 @@ public class SduCalcitePlanningConfigBuilder {
         rootSchema, Collections.emptyList(), typeFactory, new CalciteConnectionConfigImpl(props));
   }
 
-
   public SduCalciteSqlPlanner createCalcitePlanner() {
     Function<Boolean, CalciteCatalogReader> catalogReaderSupplier = this::createCatalogReader;
     return new SduCalciteSqlPlanner(frameworkConfig, catalogReaderSupplier, planner, typeFactory);
@@ -139,7 +138,11 @@ public class SduCalcitePlanningConfigBuilder {
     return new SduCalciteRelBuilder(frameworkConfig.getContext(), cluster, relOptSchema);
   }
 
-  public Context getContext() {
+  Context getContext() {
     return context;
+  }
+
+  RelOptPlanner getPlanner() {
+    return planner;
   }
 }
