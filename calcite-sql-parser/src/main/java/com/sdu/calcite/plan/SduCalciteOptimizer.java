@@ -1,7 +1,10 @@
 package com.sdu.calcite.plan;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import org.apache.calcite.plan.Context;
+import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.plan.hep.HepMatchOrder;
@@ -9,31 +12,49 @@ import org.apache.calcite.plan.hep.HepPlanner;
 import org.apache.calcite.plan.hep.HepProgram;
 import org.apache.calcite.plan.hep.HepProgramBuilder;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.tools.Program;
+import org.apache.calcite.tools.Programs;
+import org.apache.calcite.tools.RelBuilder;
 import org.apache.calcite.tools.RuleSet;
 
+public abstract class SduCalciteOptimizer {
 
-class SduCalciteHepPlanner {
+  private final SduCalcitePlanningConfigBuilder calcitePlanningConfigBuilder;
 
-  private SduCalciteHepPlanner() {
-
+  public SduCalciteOptimizer(SduCalcitePlanningConfigBuilder calcitePlanningConfigBuilder) {
+    this.calcitePlanningConfigBuilder = requireNonNull(calcitePlanningConfigBuilder);
   }
+
+  public abstract RelNode optimize(RelNode relNode, RelBuilder relBuilder);
+
+  protected RelNode runVolcanoPlanner(RelNode input, RuleSet ruleSet, RelTraitSet targetTraits, RelOptPlanner planner) {
+    /*
+     * https://zhuanlan.zhihu.com/p/48735419
+     *
+     * VolcanoPlanner是基于成本的优化算法, 通过剪枝和缓冲中间结果(动态规划)的方法降低计算消耗
+     *
+     *
+     * */
+    Program optProgram = Programs.ofRules(ruleSet);
+    return optProgram.run(planner, input, targetTraits, ImmutableList.of(), ImmutableList.of());
+  }
+
 
   /**
    * run HEP planner with rules applied simultaneously. Apply all of the rules to the given
    * node before going to the next one. If a rule creates a new node all of the rules will
    * be applied to this new node.
    * */
-  static RelNode runHepPlannerSimultaneously(
+  protected RelNode runHepPlannerSimultaneously(
       HepMatchOrder hepMatchOrder ,
       RuleSet ruleSet,
       RelNode input,
-      RelTraitSet targetTraits,
-      Context context) {
+      RelTraitSet targetTraits) {
 
     HepProgramBuilder builder = new HepProgramBuilder();
     builder.addMatchOrder(hepMatchOrder);
     builder.addRuleCollection(Lists.newArrayList(ruleSet.iterator()));
-    return runHepPlanner(builder.build(), input, targetTraits, context);
+    return runHepPlanner(builder.build(), input, targetTraits);
   }
 
   /**
@@ -41,27 +62,25 @@ class SduCalciteHepPlanner {
    * and only then apply the next rule. If a rule creates a new node preceding rules will not
    * be applied to the newly created node.
    * */
-  static RelNode runHepPlannerSequentially(
+  protected RelNode runHepPlannerSequentially(
       HepMatchOrder hepMatchOrder,
       RuleSet ruleSet,
       RelNode input,
-      RelTraitSet targetTraits,
-      Context context) {
+      RelTraitSet targetTraits) {
     HepProgramBuilder builder = new HepProgramBuilder();
     builder.addMatchOrder(hepMatchOrder);
     for (RelOptRule relOptRule : ruleSet) {
       builder.addRuleInstance(relOptRule);
     }
-    return runHepPlanner(builder.build(), input, targetTraits, context);
+    return runHepPlanner(builder.build(), input, targetTraits);
   }
 
 
 
-  private static RelNode runHepPlanner(
+  private RelNode runHepPlanner(
       HepProgram hepProgram,
       RelNode input,
-      RelTraitSet targetTraits,
-      Context context) {
+      RelTraitSet targetTraits) {
     /*
      * 1: HepProgram
      *
@@ -72,7 +91,7 @@ class SduCalciteHepPlanner {
      *    Context的主要是用来传递信息的, 如外层传入的参数可以在优化规则中获取
      *
      * */
-    HepPlanner planner = new HepPlanner(hepProgram, context);
+    HepPlanner planner = new HepPlanner(hepProgram, calcitePlanningConfigBuilder.getContext());
     /*
      * HepPlanner.setRoot()
      *
@@ -145,6 +164,4 @@ class SduCalciteHepPlanner {
      * */
     return planner.findBestExp();
   }
-
-
 }

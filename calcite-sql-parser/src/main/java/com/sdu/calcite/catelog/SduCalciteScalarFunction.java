@@ -5,7 +5,7 @@ import static com.sdu.sql.parse.UserDefinedFunctionUtils.createEvalOperandTypeIn
 import static com.sdu.sql.parse.UserDefinedFunctionUtils.getEvalMethod;
 
 import com.sdu.sql.entry.SduScalarFunction;
-import com.sdu.calcite.SduCalciteTypeFactory;
+import com.sdu.calcite.plan.SduCalciteTypeFactory;
 import java.lang.reflect.Method;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlFunction;

@@ -2,7 +2,7 @@ package com.sdu.calcite.catelog;
 
 import static java.util.Objects.requireNonNull;
 
-import com.sdu.calcite.SduCalciteTypeFactory;
+import com.sdu.calcite.plan.SduCalciteTypeFactory;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;

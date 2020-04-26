@@ -1,4 +1,4 @@
-package com.sdu.calcite;
+package com.sdu.calcite.plan;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;

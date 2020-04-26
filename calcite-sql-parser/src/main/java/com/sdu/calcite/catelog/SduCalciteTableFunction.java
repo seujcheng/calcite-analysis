@@ -4,7 +4,7 @@ import static com.sdu.sql.parse.UserDefinedFunctionUtils.createEvalOperandTypeCh
 import static com.sdu.sql.parse.UserDefinedFunctionUtils.createEvalOperandTypeInference;
 
 import com.sdu.sql.entry.SduTableFunction;
-import com.sdu.calcite.SduCalciteTypeFactory;
+import com.sdu.calcite.plan.SduCalciteTypeFactory;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.type.ReturnTypes;

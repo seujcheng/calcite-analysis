@@ -5,7 +5,7 @@ import com.sdu.sql.entry.SduFunction;
 import com.sdu.sql.entry.SduScalarFunction;
 import com.sdu.sql.entry.SduTableFunction;
 import com.sdu.calcite.function.FunctionKind;
-import com.sdu.calcite.SduCalciteTypeFactory;
+import com.sdu.calcite.plan.SduCalciteTypeFactory;
 import com.sdu.sql.parse.SduFunctionCatalog;
 import com.sdu.sql.parse.UserDefinedFunctionUtils;
 import java.util.List;

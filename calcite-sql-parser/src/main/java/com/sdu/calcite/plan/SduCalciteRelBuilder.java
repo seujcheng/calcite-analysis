@@ -1,4 +1,4 @@
-package com.sdu.calcite;
+package com.sdu.calcite.plan;
 
 import org.apache.calcite.plan.Context;
 import org.apache.calcite.plan.RelOptCluster;

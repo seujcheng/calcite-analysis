@@ -1,4 +1,4 @@
-package com.sdu.calcite;
+package com.sdu.calcite.plan;
 
 import com.google.common.collect.ImmutableList;
 import com.sdu.calcite.metadata.SduCalciteRelMdRowCount;
@@ -11,7 +11,7 @@ import org.apache.calcite.rel.metadata.RelMetadataProvider;
 import org.apache.calcite.rel.metadata.RelMetadataQuery;
 import org.apache.calcite.rex.RexBuilder;
 
-class SduRelOptClusterFactory {
+class SduCalciteRelOptClusterFactory {
 
   private static final RelMetadataProvider SOURCE = ChainedRelMetadataProvider.of(
       ImmutableList.of(
@@ -20,7 +20,7 @@ class SduRelOptClusterFactory {
       )
   );
 
-  private SduRelOptClusterFactory() {
+  private SduCalciteRelOptClusterFactory() {
   }
 
   static RelOptCluster create(RelOptPlanner planner, RexBuilder builder) {

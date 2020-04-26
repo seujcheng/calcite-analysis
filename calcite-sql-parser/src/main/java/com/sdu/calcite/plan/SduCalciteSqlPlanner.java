@@ -1,41 +1,45 @@
 package com.sdu.calcite.plan;
 
-import com.sdu.calcite.SduCalciteRelBuilder;
-import com.sdu.calcite.SduCalciteSqlValidator;
 import java.util.List;
-import java.util.Properties;
-import lombok.Getter;
-import org.apache.calcite.config.CalciteConnectionConfigImpl;
-import org.apache.calcite.config.CalciteConnectionProperty;
-import org.apache.calcite.jdbc.CalciteSchema;
+import java.util.function.Function;
 import org.apache.calcite.plan.RelOptCluster;
-import org.apache.calcite.plan.RelOptTable;
+import org.apache.calcite.plan.RelOptPlanner;
+import org.apache.calcite.plan.RelOptTable.ViewExpander;
+import org.apache.calcite.plan.RelTraitDef;
 import org.apache.calcite.prepare.CalciteCatalogReader;
+import org.apache.calcite.prepare.Prepare.CatalogReader;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rex.RexBuilder;
-import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
 
-public class SduCalciteSqlPlanner {
+public class SduCalciteSqlPlanner implements ViewExpander {
 
   private final FrameworkConfig frameworkConfig;
-  @Getter
-  private final SduCalciteRelBuilder builder;
+  private final RelOptPlanner planner;
+  private final Function<Boolean, CalciteCatalogReader> catalogReaderSupplier;
   private final RelDataTypeFactory typeFactory;
 
   private SduCalciteSqlValidator validator;
 
-  SduCalciteSqlPlanner(FrameworkConfig frameworkConfig, SduCalciteRelBuilder builder,
+  SduCalciteSqlPlanner(
+      FrameworkConfig frameworkConfig,
+      Function<Boolean, CalciteCatalogReader> catalogReaderSupplier,
+      RelOptPlanner planner,
       RelDataTypeFactory typeFactory) {
-    this.frameworkConfig = frameworkConfig;
-    this.builder = builder;
+    this.planner = planner;
     this.typeFactory = typeFactory;
+    this.frameworkConfig = frameworkConfig;
+    this.catalogReaderSupplier = catalogReaderSupplier;
+    // 指定构建RelNode时添加的默认特征
+    for (RelTraitDef traitDef : frameworkConfig.getTraitDefs()) {
+      planner.addRelTraitDef(traitDef);
+    }
   }
 
   public SqlNode parse(String sql) throws SqlParseException {
@@ -44,60 +48,34 @@ public class SduCalciteSqlPlanner {
   }
 
   public RelRoot validateAndRel(SqlNode sqlNode) {
-    CalciteCatalogReader catalogReader = createCatalogReader(frameworkConfig.getDefaultSchema(),
-        typeFactory,
-        frameworkConfig.getParserConfig());
-
-    // Validate SqlNode
-    validator = new SduCalciteSqlValidator(frameworkConfig.getOperatorTable(),
-        catalogReader, typeFactory, frameworkConfig.getParserConfig().conformance());
-
-    // Translate To RelNode
+    validator = getOrCreateSqlValidator();
+    assert validator != null;
     RexBuilder rexBuilder = new RexBuilder(typeFactory);
-    RelOptCluster cluster = RelOptCluster.create(builder.getPlaner(), rexBuilder);
+    RelOptCluster cluster = SduCalciteRelOptClusterFactory.create(planner, rexBuilder);
     SqlToRelConverter sqlToRelConverter = new SqlToRelConverter(
-        new ViewExpanderImpl(),
+        this,
         validator,
-        catalogReader,
+        validator.getCatalogReader().unwrap(CatalogReader.class),
         cluster,
         frameworkConfig.getConvertletTable(),
         frameworkConfig.getSqlToRelConverterConfig());
-
     return sqlToRelConverter.convertQuery(sqlNode, true, true);
   }
 
-
-
-  private static class ViewExpanderImpl implements RelOptTable.ViewExpander {
-
-    @Override
-    public RelRoot expandView(RelDataType rowType, String queryString, List<String> schemaPath,
-        List<String> viewPath) {
-      return null;
+  private SduCalciteSqlValidator getOrCreateSqlValidator() {
+    if (validator == null) {
+      CalciteCatalogReader catalogReader = catalogReaderSupplier.apply(false);
+      validator = new SduCalciteSqlValidator(frameworkConfig.getOperatorTable(),
+          catalogReader, typeFactory, frameworkConfig.getParserConfig().conformance());
+      validator.setIdentifierExpansion(true);
     }
-
+    return validator;
   }
 
-  private static SchemaPlus rootSchema(SchemaPlus schema) {
-    if (schema.getParentSchema() == null) {
-      return schema;
-    }
-    return rootSchema(schema.getParentSchema());
-  }
-
-  private static CalciteCatalogReader createCatalogReader(SchemaPlus defaultSchema,
-      RelDataTypeFactory typeFactory, SqlParser.Config parserConfig) {
-    SchemaPlus rootSchema = rootSchema(defaultSchema);
-
-    Properties props = new Properties();
-    props.setProperty(CalciteConnectionProperty.CASE_SENSITIVE.camelName(),
-        String.valueOf(parserConfig.caseSensitive()));
-
-    return new CalciteCatalogReader(
-        CalciteSchema.from(rootSchema),
-        CalciteSchema.from(defaultSchema).path(null),
-        typeFactory,
-        new CalciteConnectionConfigImpl(props));
+  @Override
+  public RelRoot expandView(RelDataType rowType, String queryString, List<String> schemaPath,
+      List<String> viewPath) {
+    throw new RuntimeException("");
   }
 
 }

@@ -1,4 +1,4 @@
-package com.sdu.calcite;
+package com.sdu.calcite.plan;
 
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.sql.SqlOperatorTable;
@@ -6,9 +6,9 @@ import org.apache.calcite.sql.validate.SqlConformance;
 import org.apache.calcite.sql.validate.SqlValidatorCatalogReader;
 import org.apache.calcite.sql.validate.SqlValidatorImpl;
 
-public class SduCalciteSqlValidator extends SqlValidatorImpl {
+class SduCalciteSqlValidator extends SqlValidatorImpl {
 
-  public SduCalciteSqlValidator(
+  SduCalciteSqlValidator(
       SqlOperatorTable opTab,
       SqlValidatorCatalogReader catalogReader,
       RelDataTypeFactory typeFactory,

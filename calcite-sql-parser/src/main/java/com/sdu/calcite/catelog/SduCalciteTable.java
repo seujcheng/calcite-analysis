@@ -2,7 +2,7 @@ package com.sdu.calcite.catelog;
 
 import com.sdu.sql.entry.SduOption;
 import com.sdu.sql.entry.SduTableColumn;
-import com.sdu.calcite.SduCalciteTypeFactory;
+import com.sdu.calcite.plan.SduCalciteTypeFactory;
 import java.util.List;
 import java.util.Map;
 import org.apache.calcite.rel.type.RelDataType;
