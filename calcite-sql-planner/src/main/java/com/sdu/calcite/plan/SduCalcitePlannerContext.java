@@ -33,7 +33,7 @@ import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 
-public class SduCalcitePlanningConfigBuilder {
+public class SduCalcitePlannerContext {
 
   private SduCalciteConfig calciteConfig;
 
@@ -44,7 +44,7 @@ public class SduCalcitePlanningConfigBuilder {
   private final FrameworkConfig frameworkConfig;
 
 
-  public SduCalcitePlanningConfigBuilder(SduCalciteConfig calciteConfig) {
+  public SduCalcitePlannerContext(SduCalciteConfig calciteConfig) {
     this.calciteConfig = calciteConfig;
     this.context = calciteConfig.getContext().orElse(Contexts.empty());
     this.costFactory = calciteConfig.getRelOptCostFactory().orElse(new SduRelOptCostFactory());

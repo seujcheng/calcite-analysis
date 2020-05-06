@@ -9,7 +9,7 @@ import org.apache.calcite.tools.RelBuilder;
 
 public class SduCalciteOptimizerTest extends SduCalciteOptimizer {
 
-  public SduCalciteOptimizerTest(SduCalcitePlanningConfigBuilder calcitePlanningConfigBuilder) {
+  public SduCalciteOptimizerTest(SduCalcitePlannerContext calcitePlanningConfigBuilder) {
     super(calcitePlanningConfigBuilder);
   }
 

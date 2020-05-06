@@ -1,7 +1,7 @@
 package com.sdu.calcite;
 
 import com.sdu.calcite.plan.SduCalciteOptimizer;
-import com.sdu.calcite.plan.SduCalcitePlanningConfigBuilder;
+import com.sdu.calcite.plan.SduCalcitePlannerContext;
 import com.sdu.calcite.plan.SduCalciteRelBuilder;
 import com.sdu.calcite.plan.SduCalciteSqlPlanner;
 import java.util.Objects;
@@ -17,20 +17,20 @@ public class SduPlanner {
 
   private final Logger LOG = LoggerFactory.getLogger(SduPlanner.class);
 
-  private final SduCalcitePlanningConfigBuilder calcitePlanningConfigBuilder;
+  private final SduCalcitePlannerContext calcitePlannerContext;
 
   private final SduCalciteOptimizer calciteOptimizer;
 
   public SduPlanner(
-      SduCalcitePlanningConfigBuilder calcitePlanningConfigBuilder,
-      Function<SduCalcitePlanningConfigBuilder, SduCalciteOptimizer> calciteOptimizerSupplier) {
-    this.calcitePlanningConfigBuilder = Objects.requireNonNull(calcitePlanningConfigBuilder);
-    this.calciteOptimizer = calciteOptimizerSupplier.apply(calcitePlanningConfigBuilder);
+      SduCalcitePlannerContext calcitePlannerContext,
+      Function<SduCalcitePlannerContext, SduCalciteOptimizer> calciteOptimizerSupplier) {
+    this.calcitePlannerContext = Objects.requireNonNull(calcitePlannerContext);
+    this.calciteOptimizer = calciteOptimizerSupplier.apply(calcitePlannerContext);
   }
 
   public RelNode optimizePlan(SqlNode sqlNode) {
-    SduCalciteSqlPlanner planner = calcitePlanningConfigBuilder.createCalcitePlanner();
-    SduCalciteRelBuilder relBuilder = calcitePlanningConfigBuilder.createCalciteRelBuilder();
+    SduCalciteSqlPlanner planner = calcitePlannerContext.createCalcitePlanner();
+    SduCalciteRelBuilder relBuilder = calcitePlannerContext.createCalciteRelBuilder();
 
     RelRoot relRoot = planner.validateAndRel(sqlNode);
     RelNode relNode = calciteOptimizer.optimize(relRoot.rel, relBuilder);

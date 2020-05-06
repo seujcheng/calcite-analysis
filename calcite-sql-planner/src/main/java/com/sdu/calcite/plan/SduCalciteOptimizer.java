@@ -25,9 +25,9 @@ import org.apache.calcite.tools.RuleSet;
  * */
 public abstract class SduCalciteOptimizer {
 
-  private final SduCalcitePlanningConfigBuilder calcitePlanningConfigBuilder;
+  private final SduCalcitePlannerContext calcitePlanningConfigBuilder;
 
-  public SduCalciteOptimizer(SduCalcitePlanningConfigBuilder calcitePlanningConfigBuilder) {
+  public SduCalciteOptimizer(SduCalcitePlannerContext calcitePlanningConfigBuilder) {
     this.calcitePlanningConfigBuilder = requireNonNull(calcitePlanningConfigBuilder);
   }
 

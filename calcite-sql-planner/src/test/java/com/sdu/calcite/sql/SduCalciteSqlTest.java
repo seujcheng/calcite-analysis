@@ -5,7 +5,7 @@ import com.sdu.calcite.SduCalciteConfigImpl;
 import com.sdu.calcite.SduPlanner;
 import com.sdu.calcite.plan.SduCalciteOptimizer;
 import com.sdu.calcite.plan.SduCalciteOptimizerTest;
-import com.sdu.calcite.plan.SduCalcitePlanningConfigBuilder;
+import com.sdu.calcite.plan.SduCalcitePlannerContext;
 import com.sdu.sql.entry.SduInsert;
 import com.sdu.sql.entry.SduSqlStatement;
 import com.sdu.sql.parse.SduCalciteSqlParser;
@@ -20,8 +20,8 @@ import org.junit.Test;
 
 public class SduCalciteSqlTest {
 
-  private Function<SduSqlStatement, SduCalcitePlanningConfigBuilder> calcitePlannerBuilderSupplier;
-  private Function<SduCalcitePlanningConfigBuilder, SduCalciteOptimizer> calciteOptimizerSupplier;
+  private Function<SduSqlStatement, SduCalcitePlannerContext> calcitePlannerBuilderSupplier;
+  private Function<SduCalcitePlannerContext, SduCalciteOptimizer> calciteOptimizerSupplier;
 
   private static String readSqlText(String name) throws IOException {
     InputStream stream = SduCalciteSqlTest.class.getResourceAsStream(name);
@@ -42,7 +42,7 @@ public class SduCalciteSqlTest {
   public void setup() {
     calcitePlannerBuilderSupplier = statement -> {
       SduCalciteConfig calciteConfig = SduCalciteConfigImpl.fromSduSqlStatement(statement);
-      return new SduCalcitePlanningConfigBuilder(calciteConfig);
+      return new SduCalcitePlannerContext(calciteConfig);
     };
 
     calciteOptimizerSupplier = SduCalciteOptimizerTest::new;
