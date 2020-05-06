@@ -77,7 +77,7 @@ public class SduCalciteSqlPlanner implements ViewExpander {
     return sqlToRelConverter.convertQuery(sqlNode, true, true);
   }
 
-  private SduCalciteSqlValidator getOrCreateSqlValidator() {
+  public SduCalciteSqlValidator getOrCreateSqlValidator() {
     if (validator == null) {
       CalciteCatalogReader catalogReader = catalogReaderSupplier.apply(false);
       validator = new SduCalciteSqlValidator(frameworkConfig.getOperatorTable(),
