@@ -12,6 +12,7 @@ import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rex.RexBuilder;
+import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -45,6 +46,20 @@ public class SduCalciteSqlPlanner implements ViewExpander {
   public SqlNode parse(String sql) throws SqlParseException {
     SqlParser parser = SqlParser.create(sql, frameworkConfig.getParserConfig());
     return parser.parseQuery(sql);
+  }
+
+  public SqlNode validate(SqlNode sqlNode) {
+    validator = getOrCreateSqlValidator();
+
+    // DDL不需要验证
+    if (sqlNode.getKind().belongsTo(SqlKind.DDL)
+        || sqlNode.getKind() == SqlKind.CREATE_FUNCTION
+        || sqlNode.getKind() == SqlKind.DROP_FUNCTION
+        || sqlNode.getKind() == SqlKind.OTHER_DDL) {
+      return sqlNode;
+    }
+
+    return validator.validate(sqlNode);
   }
 
   public RelRoot validateAndRel(SqlNode sqlNode) {

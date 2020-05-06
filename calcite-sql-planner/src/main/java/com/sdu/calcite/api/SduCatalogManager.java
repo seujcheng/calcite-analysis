@@ -11,9 +11,12 @@ import com.sdu.calcite.plan.catalog.SduObjectIdentifier;
 import com.sdu.calcite.plan.catalog.SduObjectPath;
 import com.sdu.calcite.plan.catalog.exceptions.SduCatalogException;
 import com.sdu.calcite.plan.catalog.exceptions.SduCatalogNotExistException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class SduCatalogManager {
 
@@ -76,8 +79,42 @@ public class SduCatalogManager {
     }
   }
 
-  public Optional<SduCatalog> getCatalog(String catalogName) {
+  // ------------ catalog ------------
+  public boolean schemaExists(String catalogName) {
+    return getCatalog(catalogName).isPresent();
+  }
+
+  public Set<String> listCatalogs() {
+    return Collections.unmodifiableSet(catalogs.keySet());
+  }
+
+  private Optional<SduCatalog> getCatalog(String catalogName) {
     return Optional.ofNullable(catalogs.get(catalogName));
+  }
+
+  // ------------ catalog database -----------
+  public boolean schemaExists(String catalogName, String databaseName) {
+    return getCatalog(catalogName)
+        .map(catalog -> catalog.databaseExists(databaseName))
+        .orElse(false);
+  }
+
+  public Set<String> listSchemas(String catalogName) {
+    Set<String> databases = new HashSet<>();
+    getCatalog(catalogName)
+        .ifPresent(catalog -> databases.addAll(catalog.listDatabases()));
+    return databases;
+  }
+
+  // ------------ catalog table ------------
+
+  public Set<String> listTables(String catalogName, String databaseName) {
+    Set<String> tables = new HashSet<>();
+    getCatalog(catalogName)
+        .filter(catalog -> catalog.databaseExists(databaseName))
+        .ifPresent(catalog -> tables.addAll(catalog.listTables(databaseName)));
+
+    return tables;
   }
 
   public Optional<SduCatalogTable> getTable(SduObjectIdentifier objectIdentifier) {
