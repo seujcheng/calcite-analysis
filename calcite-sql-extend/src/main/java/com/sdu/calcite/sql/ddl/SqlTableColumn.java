@@ -1,5 +1,7 @@
 package com.sdu.calcite.sql.ddl;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.apache.calcite.adapter.java.JavaTypeFactory;
@@ -36,8 +38,8 @@ public class SqlTableColumn extends SqlCall {
       SqlCharStringLiteral path,
       SqlCharStringLiteral comment) {
     super(pos);
-    this.name = name;
-    this.type = type;
+    this.name = requireNonNull(name, "column name should not be null");
+    this.type = requireNonNull(type, "column type should not be null");
     this.path = path;
     this.comment = comment;
   }

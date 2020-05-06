@@ -40,8 +40,8 @@ public class SqlCreateTable extends SqlCreate  {
         SqlCharStringLiteral comment,
         SqlNodeList properties) {
         super(OPERATOR, pos, false, false);
-        this.name = requireNonNull(name);
-        this.columns = requireNonNull(columns);
+        this.name = requireNonNull(name, "table name should not be null");
+        this.columns = requireNonNull(columns, "table columns should not be null");
         this.comment = comment;
         this.properties = properties;
     }

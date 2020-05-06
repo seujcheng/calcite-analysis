@@ -69,7 +69,27 @@ SqlNode SqlOption() :
     }
 }
 
-void TableColumn(List<SqlNode> list) :
+/**
+  * 表列有两种格式:
+  *
+  * 1: 常量列, 其语法格式: column type [COMMENT]
+  *
+  * 2: 计算列, 其语法格式: column AS compute_expression [COMMENT]
+  *
+  * JavaCC解析列时, 需要看两个Token便可区分(即第二个Token是否为AS)
+  */
+void TableColumn(List<SqlNode>list):
+{
+}
+{
+   (LOOKAHEAD(2)
+      TableColumn2(list)
+   |
+      ComputeColumn(list)
+   )
+}
+
+void TableColumn2(List<SqlNode> list) :
 {
    SqlParserPos pos;
    SqlIdentifier name;
@@ -96,6 +116,22 @@ void TableColumn(List<SqlNode> list) :
     {
         SqlTableColumn column = new SqlTableColumn(getPos(), name, type, path, comment);
         list.add(column);
+    }
+}
+
+void ComputeColumn(List<SqlNode> list):
+{
+    SqlNode identifier;
+    SqlNode expr;
+    SqlParserPos pos;
+}
+{
+    identifier = SimpleIdentifier() {pos = getPos();}
+    <AS>
+    expr = Expression(ExprContext.ACCEPT_NON_QUERY)
+    {
+        expr = SqlStdOperatorTable.AS.createCall(Span.of(identifier, expr).pos(), expr, identifier);
+        list.add(expr);
     }
 }
 
