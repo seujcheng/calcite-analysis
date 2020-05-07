@@ -2,6 +2,8 @@ package com.sdu.calcite.plan.catalog;
 
 import com.sdu.calcite.plan.catalog.exceptions.SduCatalogException;
 import com.sdu.calcite.plan.catalog.exceptions.SduDatabaseNotExistException;
+import com.sdu.calcite.plan.catalog.exceptions.SduFunctionAlreadyExistException;
+import com.sdu.calcite.plan.catalog.exceptions.SduTableAlreadyExistException;
 import com.sdu.calcite.plan.catalog.exceptions.SduTableNotExistException;
 import java.util.List;
 
@@ -21,6 +23,9 @@ public interface SduCatalog {
 
   // ------- table -----------
 
+  void createTable(SduObjectPath tablePath, SduCatalogTable catalogTable, boolean ignoreIfExists)
+      throws SduTableAlreadyExistException, SduDatabaseNotExistException, SduCatalogException;
+
   boolean tableExists(SduObjectPath tablePath) throws SduCatalogException;
 
   List<String> listTables(String databaseName) throws SduDatabaseNotExistException, SduCatalogException;
@@ -28,5 +33,13 @@ public interface SduCatalog {
   SduCatalogTable getTable(SduObjectPath tablePath) throws SduTableNotExistException, SduCatalogException;
 
   String getDefaultDatabase() throws SduCatalogException;
+
+  // ------- function ---------
+  // ------------- catalog function -------------
+  boolean functionExists(SduObjectPath path);
+
+  void createFunction(SduObjectPath functionPath, SduCatalogFunction function, boolean ignoreIfExists)
+      throws SduFunctionAlreadyExistException, SduDatabaseNotExistException, SduCatalogException;
+
 
 }

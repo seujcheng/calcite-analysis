@@ -46,8 +46,16 @@ public class SqlCreateTable extends SqlCreate  {
         this.properties = properties;
     }
 
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+
     public SqlIdentifier getName() {
         return name;
+    }
+
+    public String[] fullTableName() {
+        return name.names.toArray(new String[0]);
     }
 
     public SqlNodeList getColumns() {

@@ -57,13 +57,8 @@ public class SqlTableColumn extends SqlCall {
     return comment;
   }
 
-  public String dataType() {
-    try {
-      RelDataType relDataType = type.deriveType(typeFactory);
-      return relDataType.getSqlTypeName().getName();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+  public SqlDataTypeSpec getType() {
+    return type;
   }
 
   @Nonnull

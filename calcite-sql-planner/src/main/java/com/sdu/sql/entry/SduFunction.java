@@ -38,7 +38,7 @@ public abstract class SduFunction {
   public static SduFunction fromSqlCreateFunction(SqlNode sqlNode) {
     if (sqlNode instanceof SqlCreateFunction) {
       SqlCreateFunction createFunction = (SqlCreateFunction) sqlNode;
-      String functionName = createFunction.getName().getSimple();
+      String functionName = createFunction.getName();
 
       /*
        * CREATE FUNCTION DATA_FORMAT WITH (
@@ -66,7 +66,7 @@ public abstract class SduFunction {
           TableFunction<?> tableFunction = (TableFunction<?>) definedFunction;
           SduTableFunction sduTableFunction = SduTableFunction.fromUserDefinedFunction(tableFunction);
           sduTableFunction.setPos(createFunction.getParserPosition());
-          sduTableFunction.setName(createFunction.getName().getSimple());
+          sduTableFunction.setName(createFunction.getName());
           sduTableFunction.setProperties(properties);
           return sduTableFunction;
 
@@ -74,7 +74,7 @@ public abstract class SduFunction {
           ScalarFunction scalarFunction = (ScalarFunction) definedFunction;
           SduScalarFunction sduScalarFunction = SduScalarFunction.fromUserDefinedFunction(scalarFunction);
           sduScalarFunction.setPos(createFunction.getParserPosition());
-          sduScalarFunction.setName(createFunction.getName().getSimple());
+          sduScalarFunction.setName(createFunction.getName());
           sduScalarFunction.setProperties(properties);
           return sduScalarFunction;
 

@@ -9,10 +9,15 @@ import java.sql.Timestamp;
 import java.util.Map;
 import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
 import org.apache.calcite.rel.type.RelDataType;
+import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.util.ConversionUtil;
 
 public class SduCalciteTypeFactory extends JavaTypeFactoryImpl {
+
+  public SduCalciteTypeFactory(RelDataTypeSystem typeSystem) {
+    super(typeSystem);
+  }
 
   public RelDataType createSqlType(String typeName) {
     switch (typeName) {

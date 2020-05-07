@@ -1,24 +1,24 @@
 package com.sdu.calcite.plan;
 
 import com.sdu.calcite.plan.nodes.SduConventions;
+import org.apache.calcite.plan.Context;
+import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.plan.hep.HepMatchOrder;
 import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.sql2rel.RelDecorrelator;
-import org.apache.calcite.tools.RelBuilder;
 
-public class SduCalciteOptimizerTest extends SduCalciteOptimizer {
+class SduRelOptimizerTest extends SduRelOptimizer {
 
-  public SduCalciteOptimizerTest(SduCalcitePlannerContext calcitePlanningConfigBuilder) {
-    super(calcitePlanningConfigBuilder);
+  SduRelOptimizerTest(Context context, RelOptPlanner planner) {
+    super(context, planner);
   }
 
   @Override
-  public RelNode optimize(RelNode relNode, RelBuilder relBuilder) {
+  public RelNode optimize(RelNode relNode) {
     RelNode convSubQueryPlan = optimizeConvertSubQueries(relNode);
     RelNode expandedPlan = optimizeExpandPlan(convSubQueryPlan);
-    RelNode decorPlan = RelDecorrelator.decorrelateQuery(expandedPlan, relBuilder);
-    RelNode normalizedPlan = optimizeNormalizeLogicalPlan(decorPlan);
+//    RelNode decorPlan = RelDecorrelator.decorrelateQuery(expandedPlan, relBuilder);
+    RelNode normalizedPlan = optimizeNormalizeLogicalPlan(expandedPlan);
     return optimizeLogicalPlan(normalizedPlan);
   }
 

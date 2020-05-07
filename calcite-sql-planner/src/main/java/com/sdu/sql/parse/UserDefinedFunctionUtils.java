@@ -3,10 +3,10 @@ package com.sdu.sql.parse;
 import static java.lang.String.format;
 
 import com.sdu.calcite.plan.SduCalciteTypeFactory;
-import com.sdu.calcite.catelog.SduCalciteAggFunction;
-import com.sdu.calcite.catelog.SduCalciteScalarFunction;
-import com.sdu.calcite.catelog.SduCalciteTableFunction;
-import com.sdu.calcite.catelog.SduCalciteTableFunctionImpl;
+import com.sdu.calcite.sql.SduCalciteAggFunction;
+import com.sdu.calcite.sql.SduCalciteScalarFunction;
+import com.sdu.calcite.sql.SduCalciteTableFunction;
+import com.sdu.calcite.sql.SduCalciteTableFunctionImpl;
 import com.sdu.calcite.function.FunctionKind;
 import com.sdu.calcite.function.TableFunction;
 import com.sdu.calcite.function.UserDefinedFunction;

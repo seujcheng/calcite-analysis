@@ -71,8 +71,16 @@ public class SqlCreateFunction extends SqlCreate {
     return Arrays.asList(functionIdentifier, functionProps);
   }
 
-  public SqlIdentifier getName() {
-    return functionIdentifier;
+  public boolean isIfNotExists() {
+    return ifNotExists;
+  }
+
+  public String getName() {
+    return getFunctionIdentifier()[getFunctionIdentifier().length - 1];
+  }
+
+  public String[] getFunctionIdentifier() {
+    return functionIdentifier.names.toArray(new String[0]);
   }
 
   public SqlNodeList getProperties() {

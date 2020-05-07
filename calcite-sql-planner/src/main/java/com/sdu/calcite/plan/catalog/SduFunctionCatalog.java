@@ -1,4 +1,4 @@
-package com.sdu.sql.parse;
+package com.sdu.calcite.plan.catalog;
 
 import com.sdu.sql.entry.SduFunction;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ public class SduFunctionCatalog {
     userDefinedFunctions = new HashMap<>();
   }
 
-  public void registerUserDefinedFunction(String name, SduFunction function) {
+  public void registerFunction(String name, SduFunction function) {
     SduFunction oldFunction = userDefinedFunctions.put(name, function);
     if (oldFunction != null) {
       userDefinedFunctions.put(name, oldFunction);
@@ -21,7 +21,7 @@ public class SduFunctionCatalog {
     }
   }
 
-  public Optional<SduFunction> lookupFunction(String name) {
+  Optional<SduFunction> lookupFunction(String name) {
     return userDefinedFunctions.containsKey(name) ? Optional.of(userDefinedFunctions.get(name)) : Optional.empty();
   }
 

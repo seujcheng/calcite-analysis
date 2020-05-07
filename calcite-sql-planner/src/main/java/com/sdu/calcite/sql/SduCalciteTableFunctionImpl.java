@@ -1,4 +1,4 @@
-package com.sdu.calcite.catelog;
+package com.sdu.calcite.sql;
 
 import static java.util.Objects.requireNonNull;
 
@@ -29,10 +29,10 @@ public class SduCalciteTableFunctionImpl implements TableFunction {
 
   @Override
   public RelDataType getRowType(RelDataTypeFactory typeFactory, List<Object> arguments) {
-    SduCalciteTypeFactory sduTypeFactory = (SduCalciteTypeFactory) typeFactory;
-    FieldInfoBuilder builder = sduTypeFactory.builder();
+    SduCalciteTypeFactory calciteTypeFactory = (SduCalciteTypeFactory) typeFactory;
+    FieldInfoBuilder builder = calciteTypeFactory.builder();
     for (int i = 0; i < columnNames.length; ++i) {
-      builder.add(columnNames[i], sduTypeFactory.createSqlType(columnTypes[i].getName()));
+      builder.add(columnNames[i], calciteTypeFactory.createSqlType(columnTypes[i].getName()));
     }
     return builder.build();
   }

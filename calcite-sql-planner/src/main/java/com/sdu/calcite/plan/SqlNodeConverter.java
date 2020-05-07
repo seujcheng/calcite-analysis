@@ -7,19 +7,19 @@ import org.apache.calcite.sql.SqlNode;
 public class SqlNodeConverter {
 
   private final CatalogManager catalogManager;
-  private final SduCalciteSqlPlanner plannerSupplier;
+  private final SduSqlPlanner plannerSupplier;
 
-  private SqlNodeConverter(CatalogManager catalogManager, SduCalciteSqlPlanner planner) {
+  private SqlNodeConverter(CatalogManager catalogManager, SduSqlPlanner planner) {
     this.catalogManager = catalogManager;
     this.plannerSupplier = planner;
   }
 
 
   public static void convert(
-      Supplier<SduCalciteSqlPlanner> plannerSupplier,
+      Supplier<SduSqlPlanner> plannerSupplier,
       CatalogManager catalogManager,
       SqlNode sqlNode) {
-    SduCalciteSqlPlanner planner = plannerSupplier.get();
+    SduSqlPlanner planner = plannerSupplier.get();
     SqlNode validated = planner.validate(sqlNode);
 
     SqlNodeConverter converter = new SqlNodeConverter(catalogManager, planner);

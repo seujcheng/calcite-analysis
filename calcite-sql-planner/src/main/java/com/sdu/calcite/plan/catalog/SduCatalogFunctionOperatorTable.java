@@ -1,12 +1,11 @@
-package com.sdu.calcite.catelog;
+package com.sdu.calcite.plan.catalog;
 
+import com.sdu.calcite.plan.SduCalciteTypeFactory;
 import com.sdu.sql.entry.SduAggFunction;
 import com.sdu.sql.entry.SduFunction;
 import com.sdu.sql.entry.SduScalarFunction;
 import com.sdu.sql.entry.SduTableFunction;
 import com.sdu.calcite.function.FunctionKind;
-import com.sdu.calcite.plan.SduCalciteTypeFactory;
-import com.sdu.sql.parse.SduFunctionCatalog;
 import com.sdu.sql.parse.UserDefinedFunctionUtils;
 import java.util.List;
 import java.util.Optional;
@@ -18,12 +17,12 @@ import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.SqlSyntax;
 import org.apache.calcite.sql.validate.SqlNameMatcher;
 
-public class SduCalciteFunctionOperatorTable implements SqlOperatorTable {
+public class SduCatalogFunctionOperatorTable implements SqlOperatorTable {
 
   private final SduFunctionCatalog functionCatalog;
   private final SduCalciteTypeFactory typeFactory;
 
-  public SduCalciteFunctionOperatorTable(SduCalciteTypeFactory typeFactory, SduFunctionCatalog functionCatalog) {
+  public SduCatalogFunctionOperatorTable(SduCalciteTypeFactory typeFactory, SduFunctionCatalog functionCatalog) {
     this.functionCatalog = functionCatalog;
     this.typeFactory = typeFactory;
   }

@@ -6,11 +6,16 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import com.sdu.calcite.plan.catalog.SduCatalog;
+import com.sdu.calcite.plan.catalog.SduCatalogFunction;
 import com.sdu.calcite.plan.catalog.SduCatalogTable;
 import com.sdu.calcite.plan.catalog.SduObjectIdentifier;
 import com.sdu.calcite.plan.catalog.SduObjectPath;
+import com.sdu.calcite.plan.catalog.SduUnresolvedIdentifier;
 import com.sdu.calcite.plan.catalog.exceptions.SduCatalogException;
 import com.sdu.calcite.plan.catalog.exceptions.SduCatalogNotExistException;
+import com.sdu.calcite.plan.catalog.exceptions.SduDatabaseNotExistException;
+import com.sdu.calcite.plan.catalog.exceptions.SduTableAlreadyExistException;
+import com.sdu.calcite.plan.catalog.exceptions.SduTableNotExistException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -19,6 +24,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public class SduCatalogManager {
+
+  public static final String DEFAULT_CATALOG_NAME = "default";
 
 
   private Map<String, SduCatalog> catalogs;
@@ -64,6 +71,10 @@ public class SduCatalogManager {
     }
   }
 
+  public String getCurrentCatalog() {
+    return currentCatalogName;
+  }
+
   public void setCurrentDatabase(String databaseName) {
     checkArgument(isNotBlank(databaseName), "database name cannot be null or empty");
 
@@ -77,6 +88,18 @@ public class SduCatalogManager {
     if (!currentDatabaseName.equals(databaseName)) {
       currentDatabaseName = databaseName;
     }
+  }
+
+  public String getCurrentDatabaseName() {
+    return currentDatabaseName;
+  }
+
+  public SduObjectIdentifier qualifyIdentifier(SduUnresolvedIdentifier unresolvedIdentifier) {
+    return SduObjectIdentifier.of(
+        unresolvedIdentifier.getCatalogName().orElseGet(this::getCurrentCatalog),
+        unresolvedIdentifier.getDatabaseName().orElseGet(this::getCurrentDatabaseName),
+        unresolvedIdentifier.getObjectName()
+    );
   }
 
   // ------------ catalog ------------
@@ -108,6 +131,15 @@ public class SduCatalogManager {
 
   // ------------ catalog table ------------
 
+  public void createTable(SduCatalogTable catalogTable, SduObjectIdentifier objectIdentifier, boolean ignoreIfExists) {
+    execute(
+        (catalog, objectPath) -> catalog.createTable(objectPath, catalogTable, ignoreIfExists),
+        objectIdentifier,
+        false,
+        "CreateTable"
+    );
+  }
+
   public Set<String> listTables(String catalogName, String databaseName) {
     Set<String> tables = new HashSet<>();
     getCatalog(catalogName)
@@ -129,4 +161,46 @@ public class SduCatalogManager {
 
     return Optional.of(catalog.getTable(objectPath));
   }
+
+  // ------------- catalog function -------------
+  public void createCatalogFunction(SduCatalogFunction catalogFunction, SduObjectIdentifier objectIdentifier, boolean ignoreIfExists) {
+    execute(
+        (catalog, objectPath) -> catalog.createFunction(objectIdentifier.toObjectPath(), catalogFunction, ignoreIfExists),
+        objectIdentifier,
+        true,
+        "CreateFunction"
+    );
+  }
+
+  // ------------- catalog operation ------------
+
+  private interface CatalogOperation {
+
+    void execute(SduCatalog catalog, SduObjectPath objectPath) throws Exception;
+
+  }
+
+  private void execute(
+      CatalogOperation command,
+      SduObjectIdentifier objectIdentifier,
+      boolean ignoreNoCatalog,
+      String commandName) {
+    Optional<SduCatalog> catalog = getCatalog(objectIdentifier.getCatalogName());
+    if (catalog.isPresent()) {
+      try {
+        command.execute(catalog.get(), objectIdentifier.toObjectPath());
+      } catch (SduTableAlreadyExistException | SduTableNotExistException | SduDatabaseNotExistException e) {
+        throw new SduValidationException(getErrorMessage(objectIdentifier, commandName), e);
+      } catch (Exception e) {
+        throw new SduTableException(getErrorMessage(objectIdentifier, commandName), e);
+      }
+    } else if (!ignoreNoCatalog) {
+      throw new SduValidationException(format("Catalog %s does not exist.", objectIdentifier.getCatalogName()));
+    }
+  }
+
+  private String getErrorMessage(SduObjectIdentifier objectIdentifier, String commandName) {
+    return String.format("Could not execute %s in path %s", commandName, objectIdentifier);
+  }
+
 }

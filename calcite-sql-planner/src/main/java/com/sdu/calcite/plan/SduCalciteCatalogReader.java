@@ -1,21 +1,27 @@
 package com.sdu.calcite.plan;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.calcite.config.CalciteConnectionConfig;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
-import org.apache.calcite.sql.validate.SqlNameMatcher;
+import org.apache.calcite.sql.validate.SqlNameMatchers;
 
-public class SduCalciteCatalogReader extends CalciteCatalogReader {
+class SduCalciteCatalogReader extends CalciteCatalogReader {
 
-  public SduCalciteCatalogReader(
-      CalciteSchema rootSchema,
-      SqlNameMatcher nameMatcher,
-      List<List<String>> schemaPaths,
+  SduCalciteCatalogReader(CalciteSchema rootSchema,
+      List<List<String>> defaultSchema,
       RelDataTypeFactory typeFactory,
       CalciteConnectionConfig config) {
-    super(rootSchema, nameMatcher, schemaPaths, typeFactory, config);
+    super(rootSchema,
+        SqlNameMatchers.withCaseSensitive(config != null && config.caseSensitive()),
+        Stream.concat(defaultSchema.stream(), Stream.of(Collections.<String>emptyList()))
+            .collect(Collectors.toList()),
+        typeFactory,
+        config);
   }
 
 }

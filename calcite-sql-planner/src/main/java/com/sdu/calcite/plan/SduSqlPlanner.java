@@ -2,51 +2,38 @@ package com.sdu.calcite.plan;
 
 import java.util.List;
 import java.util.function.Function;
+import org.apache.calcite.config.NullCollation;
 import org.apache.calcite.plan.RelOptCluster;
-import org.apache.calcite.plan.RelOptPlanner;
-import org.apache.calcite.plan.RelOptTable.ViewExpander;
-import org.apache.calcite.plan.RelTraitDef;
+import org.apache.calcite.plan.RelOptTable;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.prepare.Prepare.CatalogReader;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.type.RelDataType;
-import org.apache.calcite.rel.type.RelDataTypeFactory;
-import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.parser.SqlParseException;
-import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
 
-public class SduCalciteSqlPlanner implements ViewExpander {
+public class SduSqlPlanner {
 
   private final FrameworkConfig frameworkConfig;
-  private final RelOptPlanner planner;
+  private final SduCalciteTypeFactory typeFactory;
+  private final RelOptCluster cluster;
   private final Function<Boolean, CalciteCatalogReader> catalogReaderSupplier;
-  private final RelDataTypeFactory typeFactory;
 
-  private SduCalciteSqlValidator validator;
+  private SduSqlValidator validator;
 
-  SduCalciteSqlPlanner(
+  SduSqlPlanner(
       FrameworkConfig frameworkConfig,
       Function<Boolean, CalciteCatalogReader> catalogReaderSupplier,
-      RelOptPlanner planner,
-      RelDataTypeFactory typeFactory) {
-    this.planner = planner;
+      SduCalciteTypeFactory typeFactory,
+      RelOptCluster cluster) {
     this.typeFactory = typeFactory;
     this.frameworkConfig = frameworkConfig;
     this.catalogReaderSupplier = catalogReaderSupplier;
-    // 指定构建RelNode时添加的默认特征
-    for (RelTraitDef traitDef : frameworkConfig.getTraitDefs()) {
-      planner.addRelTraitDef(traitDef);
-    }
+    this.cluster = cluster;
   }
 
-  public SqlNode parse(String sql) throws SqlParseException {
-    SqlParser parser = SqlParser.create(sql, frameworkConfig.getParserConfig());
-    return parser.parseQuery(sql);
-  }
 
   public SqlNode validate(SqlNode sqlNode) {
     validator = getOrCreateSqlValidator();
@@ -62,13 +49,14 @@ public class SduCalciteSqlPlanner implements ViewExpander {
     return validator.validate(sqlNode);
   }
 
-  public RelRoot validateAndRel(SqlNode sqlNode) {
-    validator = getOrCreateSqlValidator();
+  public RelRoot rel(SqlNode sqlNode) {
+    return rel(sqlNode, getOrCreateSqlValidator());
+  }
+
+  private RelRoot rel(SqlNode sqlNode, SduSqlValidator validator) {
     assert validator != null;
-    RexBuilder rexBuilder = new RexBuilder(typeFactory);
-    RelOptCluster cluster = SduCalciteRelOptClusterFactory.create(planner, rexBuilder);
     SqlToRelConverter sqlToRelConverter = new SqlToRelConverter(
-        this,
+        new ToRelContextImpl(cluster),
         validator,
         validator.getCatalogReader().unwrap(CatalogReader.class),
         cluster,
@@ -77,20 +65,37 @@ public class SduCalciteSqlPlanner implements ViewExpander {
     return sqlToRelConverter.convertQuery(sqlNode, true, true);
   }
 
-  public SduCalciteSqlValidator getOrCreateSqlValidator() {
+  public SduSqlValidator getOrCreateSqlValidator() {
     if (validator == null) {
       CalciteCatalogReader catalogReader = catalogReaderSupplier.apply(false);
-      validator = new SduCalciteSqlValidator(frameworkConfig.getOperatorTable(),
-          catalogReader, typeFactory, frameworkConfig.getParserConfig().conformance());
+      validator = new SduSqlValidator(
+          frameworkConfig.getOperatorTable(),
+          catalogReader,
+          typeFactory);
       validator.setIdentifierExpansion(true);
+      validator.setDefaultNullCollation(NullCollation.LOW);
     }
     return validator;
   }
 
-  @Override
-  public RelRoot expandView(RelDataType rowType, String queryString, List<String> schemaPath,
-      List<String> viewPath) {
-    throw new RuntimeException("");
+  class ToRelContextImpl implements RelOptTable.ToRelContext {
+
+    final RelOptCluster cluster;
+
+    ToRelContextImpl(RelOptCluster cluster) {
+      this.cluster = cluster;
+    }
+
+    @Override
+    public RelOptCluster getCluster() {
+      return cluster;
+    }
+
+    @Override
+    public RelRoot expandView(RelDataType rowType, String queryString, List<String> schemaPath,
+        List<String> viewPath) {
+      return null;
+    }
   }
 
 }

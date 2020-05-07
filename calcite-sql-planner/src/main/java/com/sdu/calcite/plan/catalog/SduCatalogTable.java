@@ -1,16 +1,16 @@
 package com.sdu.calcite.plan.catalog;
 
-import com.sdu.sql.entry.SduTableColumn;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface SduCatalogTable {
 
-  Map<String, String> getProperties();
+  List<SduCatalogTableColumn> getColumns();
 
-  List<SduTableColumn> getColumns();
+  Optional<Map<String, String>> getProperties();
 
-  String getComment();
+  Optional<String> getComment();
 
   SduCatalogTable copy();
 

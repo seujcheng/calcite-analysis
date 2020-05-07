@@ -1,4 +1,4 @@
-package com.sdu.calcite.catelog;
+package com.sdu.calcite;
 
 import static org.apache.calcite.sql.type.OperandTypes.DATETIME_INTERVAL;
 import static org.apache.calcite.sql.type.OperandTypes.DATETIME_INTERVAL_INTERVAL;
@@ -15,7 +15,7 @@ import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.type.OperandTypes;
 import org.apache.calcite.sql.util.ReflectiveSqlOperatorTable;
 
-public class SduCalciteInternalOperatorTable extends ReflectiveSqlOperatorTable {
+public class SduInternalFunctionTable extends ReflectiveSqlOperatorTable {
 
   // 翻转窗口
   private static final SqlGroupedWindowFunction TUMBLE = new SqlGroupedWindowFunction(
@@ -217,15 +217,15 @@ public class SduCalciteInternalOperatorTable extends ReflectiveSqlOperatorTable 
     builtInSqlOperators.add(SqlStdOperatorTable.RUNNING);
 
     // WINDOW
-    builtInSqlOperators.add(SduCalciteInternalOperatorTable.TUMBLE);
-    builtInSqlOperators.add(SduCalciteInternalOperatorTable.TUMBLE_START);
-    builtInSqlOperators.add(SduCalciteInternalOperatorTable.TUMBLE_END);
-    builtInSqlOperators.add(SduCalciteInternalOperatorTable.HOP);
-    builtInSqlOperators.add(SduCalciteInternalOperatorTable.HOP_START);
-    builtInSqlOperators.add(SduCalciteInternalOperatorTable.HOP_END);
-    builtInSqlOperators.add(SduCalciteInternalOperatorTable.SESSION);
-    builtInSqlOperators.add(SduCalciteInternalOperatorTable.SESSION_START);
-    builtInSqlOperators.add(SduCalciteInternalOperatorTable.SESSION_END);
+    builtInSqlOperators.add(SduInternalFunctionTable.TUMBLE);
+    builtInSqlOperators.add(SduInternalFunctionTable.TUMBLE_START);
+    builtInSqlOperators.add(SduInternalFunctionTable.TUMBLE_END);
+    builtInSqlOperators.add(SduInternalFunctionTable.HOP);
+    builtInSqlOperators.add(SduInternalFunctionTable.HOP_START);
+    builtInSqlOperators.add(SduInternalFunctionTable.HOP_END);
+    builtInSqlOperators.add(SduInternalFunctionTable.SESSION);
+    builtInSqlOperators.add(SduInternalFunctionTable.SESSION_START);
+    builtInSqlOperators.add(SduInternalFunctionTable.SESSION_END);
 
     // OVER WINDOW
     builtInSqlOperators.add(SqlStdOperatorTable.RANK);
@@ -233,7 +233,7 @@ public class SduCalciteInternalOperatorTable extends ReflectiveSqlOperatorTable 
 
   }
 
-  public SduCalciteInternalOperatorTable() {
+  public SduInternalFunctionTable() {
     builtInSqlOperators.forEach(this::register);
   }
 

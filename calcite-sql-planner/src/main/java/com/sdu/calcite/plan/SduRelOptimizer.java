@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import org.apache.calcite.plan.Context;
 import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelTraitSet;
@@ -23,18 +24,20 @@ import org.apache.calcite.tools.RuleSet;
  * 2: 关系表达式(RelNode)的默认的特征(RelTrait), 可在VolcanoPlanner构建时添加
  *
  * */
-public abstract class SduCalciteOptimizer {
+public abstract class SduRelOptimizer {
 
-  private final SduCalcitePlannerContext calcitePlanningConfigBuilder;
+  private final Context context;
+  private final RelOptPlanner planner;
 
-  public SduCalciteOptimizer(SduCalcitePlannerContext calcitePlanningConfigBuilder) {
-    this.calcitePlanningConfigBuilder = requireNonNull(calcitePlanningConfigBuilder);
+
+  public SduRelOptimizer(Context context, RelOptPlanner planner) {
+    this.context = context;
+    this.planner = requireNonNull(planner);
   }
 
-  public abstract RelNode optimize(RelNode relNode, RelBuilder relBuilder);
+  public abstract RelNode optimize(RelNode relNode);
 
   protected RelNode runVolcanoPlanner(RuleSet ruleSet, RelNode input, RelTraitSet targetTraits) {
-    RelOptPlanner planner = calcitePlanningConfigBuilder.getPlanner();
     /*
      * https://zhuanlan.zhihu.com/p/48735419
      *
@@ -135,7 +138,7 @@ public abstract class SduCalciteOptimizer {
      *    Context的主要是用来传递信息的, 如外层传入的参数可以在优化规则中获取
      *
      * */
-    HepPlanner planner = new HepPlanner(hepProgram, calcitePlanningConfigBuilder.getContext());
+    HepPlanner planner = new HepPlanner(hepProgram, context);
     /*
      * HepPlanner.setRoot()
      *
