@@ -1,5 +1,8 @@
 package com.sdu.calcite.plan;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
@@ -17,6 +20,18 @@ public class SduCalciteTypeFactory extends JavaTypeFactoryImpl {
 
   public SduCalciteTypeFactory(RelDataTypeSystem typeSystem) {
     super(typeSystem);
+  }
+
+  public RelDataType buildRelDataType(String[] fieldNames, String[] fieldTypes) {
+    checkArgument(fieldNames != null);
+    checkArgument(fieldTypes != null);
+    checkState(fieldNames.length == fieldTypes.length);
+
+    FieldInfoBuilder builder = builder();
+    for (int i = 0; i < fieldNames.length; ++i) {
+      builder.add(fieldNames[i], createSqlType(fieldTypes[i]));
+    }
+    return builder.build();
   }
 
   public RelDataType createSqlType(String typeName) {

@@ -1,8 +1,8 @@
 package com.sdu.calcite.plan;
 
-import static com.sdu.calcite.SduCalciteSchemaBuilder.asRootSchema;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static com.sdu.calcite.CalciteSchemaBuilder.asRootSchema;
 
 import com.sdu.calcite.SduParser;
 import com.sdu.calcite.SduParserImpl;

@@ -1,5 +1,6 @@
 package com.sdu.calcite.sql;
 
+import com.google.common.collect.ImmutableList;
 import com.sdu.calcite.SduTableConfigImpl;
 import com.sdu.calcite.api.SduTableConfig;
 import com.sdu.calcite.api.SduTableEnvironment;
@@ -11,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.calcite.plan.ConventionTraitDef;
+import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlInsert;
@@ -41,7 +44,7 @@ public class SduSqlTest {
         null,
         null,
         null,
-        null,
+        ImmutableList.of(ConventionTraitDef.INSTANCE),
         null,
         new SduRelOptimizerFactoryTest()
     );
@@ -56,6 +59,9 @@ public class SduSqlTest {
     String sqlText = readSqlText(path);
     SqlNodeList sqlNodes = tableEnv.parseStmtList(sqlText);
     RelNode relNode = validateAndRel(sqlNodes, tableEnv);
+    RelNode optimized = optimizer(relNode, tableEnv);
+    System.out.println("优化后:");
+    System.out.println(RelOptUtil.toString(optimized));
   }
 
   @Test
@@ -104,8 +110,13 @@ public class SduSqlTest {
       throw new RuntimeException("");
     }
 
-    SqlNode sqlNode = tableEnv.validate(inserts.get(0));
-    return tableEnv.toRel(sqlNode);
+    SqlInsert insert = (SqlInsert) tableEnv.validate(inserts.get(0));
+    // TODO:
+    return tableEnv.toRel(insert.getSource());
+  }
+
+  private static RelNode optimizer(RelNode relNode, SduTableEnvironment tableEnv) {
+    return tableEnv.optimize(relNode);
   }
 
 }

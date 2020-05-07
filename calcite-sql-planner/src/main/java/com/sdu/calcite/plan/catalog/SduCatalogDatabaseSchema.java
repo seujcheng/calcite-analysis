@@ -1,7 +1,6 @@
 package com.sdu.calcite.plan.catalog;
 
 import com.sdu.calcite.api.SduCatalogManager;
-import com.sdu.calcite.plan.catalog.exceptions.SduTableNotExistException;
 import java.util.Set;
 import org.apache.calcite.linq4j.tree.Expression;
 import org.apache.calcite.schema.Schema;
@@ -28,7 +27,7 @@ public class SduCatalogDatabaseSchema extends SduSchema {
 
     return catalogManager.getTable(objectIdentifier)
         .map(catalogTable -> new SduCalciteTable(objectIdentifier, catalogTable))
-        .orElseThrow(() -> new SduTableNotExistException(objectIdentifier));
+        .orElse(null);
   }
 
   @Override

@@ -1,5 +1,6 @@
 package com.sdu.calcite.plan.catalog;
 
+import com.sdu.calcite.plan.SduCalciteTypeFactory;
 import javax.annotation.Nonnull;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
@@ -18,7 +19,15 @@ public class SduCalciteTable extends AbstractTable implements TemporalTable {
 
   @Override
   public RelDataType getRowType(RelDataTypeFactory typeFactory) {
-    return null;
+    SduCalciteTypeFactory calciteTypeFactory = (SduCalciteTypeFactory) typeFactory;
+    String[] fieldNames = new String[catalogTable.getColumns().size()];
+    String[] fieldTypes = new String[catalogTable.getColumns().size()];
+    for (int i = 0; i < catalogTable.getColumns().size(); ++i) {
+      SduCatalogTableColumn column = catalogTable.getColumns().get(i);
+      fieldNames[i] = column.getName();
+      fieldTypes[i] = column.getType();
+    }
+    return calciteTypeFactory.buildRelDataType(fieldNames, fieldTypes);
   }
 
   @Nonnull
