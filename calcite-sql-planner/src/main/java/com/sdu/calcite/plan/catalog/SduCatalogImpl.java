@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.sdu.calcite.plan.catalog.exceptions.SduCatalogException;
+import com.sdu.calcite.plan.catalog.exceptions.SduDatabaseAlreadyExistException;
 import com.sdu.calcite.plan.catalog.exceptions.SduDatabaseNotExistException;
 import com.sdu.calcite.plan.catalog.exceptions.SduFunctionAlreadyExistException;
 import com.sdu.calcite.plan.catalog.exceptions.SduTableAlreadyExistException;
@@ -46,6 +47,21 @@ public class SduCatalogImpl implements SduCatalog {
   @Override
   public void close() throws SduCatalogException {
 
+  }
+
+  @Override
+  public void createDatabase(String databaseName, SduCatalogDatabase database, boolean ignoreIfExists)
+      throws SduDatabaseAlreadyExistException, SduCatalogException {
+    checkArgument(StringUtils.isNotEmpty(databaseName));
+    checkNotNull(database);
+
+    if (databaseExists(databaseName)) {
+      if (!ignoreIfExists) {
+        throw new SduDatabaseAlreadyExistException(catalogName, databaseName);
+      }
+    } else {
+      databases.put(databaseName, database.copy());
+    }
   }
 
   @Override

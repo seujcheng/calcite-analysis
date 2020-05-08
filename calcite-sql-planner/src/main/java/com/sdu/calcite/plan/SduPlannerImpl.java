@@ -1,8 +1,8 @@
 package com.sdu.calcite.plan;
 
+import static com.sdu.calcite.CalciteSchemaBuilder.asRootSchema;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static com.sdu.calcite.CalciteSchemaBuilder.asRootSchema;
 
 import com.sdu.calcite.SduParser;
 import com.sdu.calcite.SduParserImpl;
@@ -127,11 +127,13 @@ public class SduPlannerImpl implements SduPlanner {
         // 物理列
         SqlTableColumn column = (SqlTableColumn) sqlNode;
         String name = column.getName().getSimple();
+        SqlCharStringLiteral columnComment = column.getComment();
+        String comment = columnComment == null ? null : columnComment.getNlsString().getValue();
         columns.add(new SduCatalogTableColumnImpl(
             name,
             physicalFieldNamesToTypes.get(name).getSqlTypeName().getName(),
             null,
-            column.getComment().getNlsString().getValue()
+            comment
         ));
       } else if (sqlNode instanceof SqlBasicCall) {
         // 虚拟列(计算列), 定义格式: column AS expr [COMMENT]

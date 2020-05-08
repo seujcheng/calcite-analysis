@@ -13,6 +13,12 @@ class SduSqlValidator extends SqlValidatorImpl {
       SqlValidatorCatalogReader catalogReader,
       JavaTypeFactory typeFactory) {
     super(opTab, catalogReader, typeFactory, SqlConformanceEnum.DEFAULT);
+
+    /*
+     *
+     * */
+    setIdentifierExpansion(true);
+    setColumnReferenceExpansion(true);
   }
 
 }

@@ -6,9 +6,9 @@ import static java.util.Collections.singletonList;
 import static org.apache.calcite.config.CalciteConnectionProperty.CASE_SENSITIVE;
 
 import com.google.common.collect.ImmutableList;
+import com.sdu.calcite.SduInternalFunctionTable;
 import com.sdu.calcite.api.SduTableConfig;
 import com.sdu.calcite.api.SqlParserException;
-import com.sdu.calcite.SduInternalFunctionTable;
 import com.sdu.calcite.plan.catalog.SduCatalogFunctionOperatorTable;
 import com.sdu.calcite.plan.catalog.SduFunctionCatalog;
 import com.sdu.calcite.plan.cost.SduRelOptCostFactory;
@@ -56,7 +56,7 @@ public class SduPlannerContext {
   private final RelOptPlanner planner;
 
 
-  public SduPlannerContext(
+  SduPlannerContext(
       SduTableConfig tableConfig,
       SduFunctionCatalog functionCatalog,
       CalciteSchema rootSchema) {
@@ -164,6 +164,11 @@ public class SduPlannerContext {
     SchemaPlus rootSchema = getRootSchema(this.rootSchema.plus());
     return new SduCalciteCatalogReader(
         CalciteSchema.from(rootSchema),
+        /*
+         * 元数据分三级管理: catalog <-- database <-- table
+         *
+         * 描述方式: catalog, catalog.database
+         * */
         asList(
             asList(currentCatalog, currentDatabase),
             singletonList(currentCatalog)
@@ -191,24 +196,11 @@ public class SduPlannerContext {
     }
   }
 
-  public SduSqlPlanner createPlanner(String currentCatalog, String currentDatabase) {
+  SduSqlPlanner createPlanner(String currentCatalog, String currentDatabase) {
     return new SduSqlPlanner(
         createFrameworkConfig(),
         isLenient -> createCatalogReader(isLenient, currentCatalog, currentDatabase),
         typeFactory,
         cluster);
-  }
-
-  public SduCalciteRelBuilder createRelBuilder(String currentCatalog, String currentDatabase) {
-    CalciteCatalogReader catalogReader = createCatalogReader(false, currentCatalog, currentDatabase);
-    return new SduCalciteRelBuilder(context, cluster, catalogReader);
-  }
-
-  Context getContext() {
-    return context;
-  }
-
-  RelOptPlanner getPlanner() {
-    return planner;
   }
 }

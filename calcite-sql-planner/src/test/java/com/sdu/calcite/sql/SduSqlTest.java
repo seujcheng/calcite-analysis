@@ -6,10 +6,15 @@ import com.sdu.calcite.api.SduTableConfig;
 import com.sdu.calcite.api.SduTableEnvironment;
 import com.sdu.calcite.api.internal.SduTableEnvironmentImpl;
 import com.sdu.calcite.plan.SduRelOptimizerFactoryTest;
+import com.sdu.calcite.plan.catalog.SduCatalog;
+import com.sdu.calcite.plan.catalog.SduCatalogDatabase;
+import com.sdu.calcite.plan.catalog.SduCatalogDatabaseImpl;
+import com.sdu.calcite.plan.catalog.SduCatalogImpl;
 import com.sdu.calcite.sql.ddl.SqlCreateFunction;
 import com.sdu.calcite.sql.ddl.SqlCreateTable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.calcite.plan.ConventionTraitDef;
@@ -51,27 +56,52 @@ public class SduSqlTest {
 
     tableEnv = SduTableEnvironmentImpl.create(tableConfig);
 
+    // catalog
+    SduCatalog catalog = new SduCatalogImpl("sdu");
+    // database
+    SduCatalogDatabase database = new SduCatalogDatabaseImpl(new HashMap<>(), "");
+    catalog.createDatabase("zhh", database, true);
+
+    tableEnv.registerCatalog("sdu", catalog);
+    tableEnv.useCatalog("sdu");
+    tableEnv.useDatabase("zhh");
+
   }
 
   @Test
-  public void testSimpleFunction() throws Exception {
+  public void testSimpleSql() throws Exception {
     String path = "/sql1.txt";
     String sqlText = readSqlText(path);
     SqlNodeList sqlNodes = tableEnv.parseStmtList(sqlText);
     RelNode relNode = validateAndRel(sqlNodes, tableEnv);
     RelNode optimized = optimizer(relNode, tableEnv);
-    System.out.println("优化后:");
+    System.out.println("After optimize:");
+    System.out.println();
     System.out.println(RelOptUtil.toString(optimized));
   }
 
   @Test
-  public void testScalarFunction() throws Exception {
-
+  public void testComputedColumn() throws Exception {
+    String path = "/sql3.txt";
+    String sqlText = readSqlText(path);
+    SqlNodeList sqlNodes = tableEnv.parseStmtList(sqlText);
+    RelNode relNode = validateAndRel(sqlNodes, tableEnv);
+    RelNode optimized = optimizer(relNode, tableEnv);
+    System.out.println("After optimize:");
+    System.out.println();
+    System.out.println(RelOptUtil.toString(optimized));
   }
 
   @Test
   public void testTopN() throws Exception{
-
+    String path = "/sql2.txt";
+    String sqlText = readSqlText(path);
+    SqlNodeList sqlNodes = tableEnv.parseStmtList(sqlText);
+    RelNode relNode = validateAndRel(sqlNodes, tableEnv);
+    RelNode optimized = optimizer(relNode, tableEnv);
+    System.out.println("After optimize:");
+    System.out.println();
+    System.out.println(RelOptUtil.toString(optimized));
   }
 
   private static RelNode validateAndRel(SqlNodeList sqlNodes, SduTableEnvironment tableEnv) {
@@ -93,6 +123,11 @@ public class SduSqlTest {
           .stream()
           .filter(sqlNode -> sqlNode instanceof SqlCreateFunction)
           .forEach(tableEnv::validate);
+      // 注册数据库表
+      sqlNodes.getList()
+          .stream()
+          .filter(sqlNode -> sqlNode instanceof SqlCreateTable)
+          .forEach(tableEnv::validate);
     } else {
       sqlNodes.getList()
           .stream()
@@ -107,10 +142,11 @@ public class SduSqlTest {
         .collect(Collectors.toList());
 
     if (inserts.size() > 1) {
-      throw new RuntimeException("");
+      throw new RuntimeException();
     }
 
     SqlInsert insert = (SqlInsert) tableEnv.validate(inserts.get(0));
+    System.out.println("SQL: " + insert.toString());
     // TODO:
     return tableEnv.toRel(insert.getSource());
   }

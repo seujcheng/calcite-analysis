@@ -11,7 +11,7 @@ public class SduCatalogDatabaseImpl implements SduCatalogDatabase {
   private final Map<String, String> properties;
   private final String comment;
 
-  SduCatalogDatabaseImpl(Map<String, String> properties, @Nullable String comment) {
+  public SduCatalogDatabaseImpl(Map<String, String> properties, @Nullable String comment) {
     this.properties = checkNotNull(properties, "properties cannot be null");
     this.comment = comment;
   }

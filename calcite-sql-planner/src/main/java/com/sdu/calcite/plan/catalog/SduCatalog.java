@@ -1,6 +1,7 @@
 package com.sdu.calcite.plan.catalog;
 
 import com.sdu.calcite.plan.catalog.exceptions.SduCatalogException;
+import com.sdu.calcite.plan.catalog.exceptions.SduDatabaseAlreadyExistException;
 import com.sdu.calcite.plan.catalog.exceptions.SduDatabaseNotExistException;
 import com.sdu.calcite.plan.catalog.exceptions.SduFunctionAlreadyExistException;
 import com.sdu.calcite.plan.catalog.exceptions.SduTableAlreadyExistException;
@@ -17,6 +18,9 @@ public interface SduCatalog {
   void close() throws SduCatalogException;
 
   // ------- database ----------
+  void createDatabase(String databaseName, SduCatalogDatabase database, boolean ignoreIfExists)
+      throws SduDatabaseAlreadyExistException, SduCatalogException;
+
   boolean databaseExists(String databaseName) throws SduCatalogException;
 
   List<String> listDatabases() throws SduCatalogException;
