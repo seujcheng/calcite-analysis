@@ -78,6 +78,10 @@ public class SduSqlPlanner {
     return validator;
   }
 
+  public FrameworkConfig config() {
+    return frameworkConfig;
+  }
+
   class ToRelContextImpl implements RelOptTable.ToRelContext {
 
     final RelOptCluster cluster;

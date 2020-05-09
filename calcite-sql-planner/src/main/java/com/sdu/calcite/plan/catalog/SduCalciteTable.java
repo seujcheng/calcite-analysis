@@ -17,6 +17,10 @@ public class SduCalciteTable extends AbstractTable implements TemporalTable {
     this.catalogTable = catalogTable;
   }
 
+  public SduCatalogTable getCatalogTable() {
+    return catalogTable;
+  }
+
   @Override
   public RelDataType getRowType(RelDataTypeFactory typeFactory) {
     SduCalciteTypeFactory calciteTypeFactory = (SduCalciteTypeFactory) typeFactory;

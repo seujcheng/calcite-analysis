@@ -11,4 +11,9 @@ public class SduCalciteRelBuilder extends RelBuilder {
     super(context, cluster, relOptSchema);
   }
 
+  public static SduCalciteRelBuilder of(RelOptCluster cluster, RelOptSchema optSchema) {
+    Context context = cluster.getPlanner().getContext();
+    return new SduCalciteRelBuilder(context, cluster, optSchema);
+  }
+
 }

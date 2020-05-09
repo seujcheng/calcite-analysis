@@ -28,5 +28,4 @@ public interface SduTableConfig {
   Optional<RelOptCostFactory> getCostFactory();
 
   Optional<SduRelOptimizerFactory> getOptimizerFactory();
-
 }

@@ -18,9 +18,8 @@ import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.config.CalciteConnectionConfig;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
+import org.apache.calcite.config.Lex;
 import org.apache.calcite.jdbc.CalciteSchema;
-import org.apache.calcite.plan.Context;
-import org.apache.calcite.plan.Contexts;
 import org.apache.calcite.plan.ConventionTraitDef;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCostFactory;
@@ -28,6 +27,7 @@ import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.RelTraitDef;
 import org.apache.calcite.plan.volcano.VolcanoPlanner;
 import org.apache.calcite.prepare.CalciteCatalogReader;
+import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.schema.SchemaPlus;
@@ -50,7 +50,7 @@ public class SduPlannerContext {
   private SduTableConfig tableConfig;
   private SduFunctionCatalog functionCatalog;
 
-  private final Context context;
+  private final SduContext context;
   private final RelOptCluster cluster;
   private final CalciteSchema rootSchema;
   private final RelOptPlanner planner;
@@ -64,7 +64,7 @@ public class SduPlannerContext {
     this.functionCatalog = functionCatalog;
     this.rootSchema = rootSchema;
 
-    this.context = Contexts.of(tableConfig);
+    this.context = new SduContextImpl(tableConfig, this::createSqlExprToRexConverter);
 
     this.typeSystem = RelDataTypeSystem.DEFAULT;
     this.typeFactory = new SduCalciteTypeFactory(typeSystem);
@@ -80,11 +80,20 @@ public class SduPlannerContext {
     this.cluster = SduCalciteRelOptClusterFactory.create(planner, new RexBuilder(typeFactory));
   }
 
+  private SduSqlExprToRexConverter createSqlExprToRexConverter(RelDataType rowType) {
+    return new SduSqlExprToRexConverterImpl(
+        createFrameworkConfig(),
+        typeFactory,
+        cluster,
+        rowType);
+  }
+
   private SqlParser.Config getSqlParserConfig() {
     return tableConfig.getSqlParserConfig()
         .orElseGet(() ->
           SqlParser.configBuilder()
               .setQuoting(Quoting.BACK_TICK)
+//              .setLex(Lex.JAVA)
               // 禁止转为大写
               .setUnquotedCasing(Casing.UNCHANGED)
               .setParserFactory(new SduCalciteSqlParserFactory())

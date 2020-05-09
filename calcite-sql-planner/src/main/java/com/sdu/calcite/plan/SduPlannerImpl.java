@@ -35,7 +35,10 @@ import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlCharStringLiteral;
+import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.dialect.CalciteSqlDialect;
+import org.apache.calcite.sql.parser.SqlParser;
 
 public class SduPlannerImpl implements SduPlanner {
 
@@ -105,6 +108,16 @@ public class SduPlannerImpl implements SduPlanner {
     return sqlPlanners.computeIfAbsent(identifier, key -> plannerContext.createPlanner(currentCatalog, currentDatabase));
   }
 
+  private String getQuotedSqlString(SqlNode sqlNode) {
+    SqlParser.Config parserConfig = getSqlPlanner().config().getParserConfig();
+    SqlDialect dialect = new CalciteSqlDialect(SqlDialect.EMPTY_CONTEXT
+        .withQuotedCasing(parserConfig.unquotedCasing())
+        .withConformance(parserConfig.conformance())
+        .withUnquotedCasing(parserConfig.unquotedCasing())
+        .withIdentifierQuoteString(parserConfig.quoting().string));
+    return sqlNode.toSqlString(dialect).getSql();
+  }
+
   private void createTable(SqlCreateTable createTable) {
     final SduSqlValidator validator = getSqlPlanner().getOrCreateSqlValidator();
 
@@ -143,7 +156,7 @@ public class SduPlannerImpl implements SduPlanner {
         columns.add(new SduCatalogTableColumnImpl(
             call.operand(1).toString(),
             validatedType.getSqlTypeName().getName(),
-            validatedExpr.toString(),
+            getQuotedSqlString(validatedExpr),
             null
         ));
       } else {

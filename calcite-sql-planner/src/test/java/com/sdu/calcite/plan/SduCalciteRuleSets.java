@@ -11,6 +11,7 @@ import org.apache.calcite.rel.rules.ProjectToCalcRule;
 import org.apache.calcite.rel.rules.ProjectToWindowRule;
 import org.apache.calcite.rel.rules.ReduceExpressionsRule;
 import org.apache.calcite.rel.rules.SubQueryRemoveRule;
+import org.apache.calcite.rel.rules.TableScanRule;
 import org.apache.calcite.tools.RuleSet;
 import org.apache.calcite.tools.RuleSets;
 
@@ -30,6 +31,7 @@ class SduCalciteRuleSets {
    * can create new plan nodes.
    */
   static RuleSet EXPAND_PLAN_RULES = RuleSets.ofList(
+      TableScanRule.INSTANCE,
       EnumerableToLogicalTableScan.INSTANCE);
 
   static RuleSet SDU_NORM_RULES = RuleSets.ofList(
