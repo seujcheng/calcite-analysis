@@ -8,6 +8,8 @@ public interface SduCatalogTable {
 
   List<SduCatalogTableColumn> getColumns();
 
+  Optional<SduCatalogTableWatermark> getTableWatermark();
+
   Optional<Map<String, String>> getProperties();
 
   Optional<String> getComment();

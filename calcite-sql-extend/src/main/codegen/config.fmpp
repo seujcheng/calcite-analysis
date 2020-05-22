@@ -26,6 +26,8 @@ data: {
         "org.apache.calcite.sql.SqlCreate",
         "org.apache.calcite.util.*",
         "com.sdu.calcite.sql.ddl.*",
+        "com.sdu.calcite.sql.utils.ParserResource",
+        "com.sdu.calcite.sql.ddl.SqlCreateTable.TableCreationContext",
         "java.util.*"
       ]
 
@@ -34,7 +36,8 @@ data: {
         "COMMENT",
         "VIRTUAL",
         "STORED",
-        "IF"
+        "IF",
+        "WATERMARK"
       ]
 
       # List of keywords from "keywords" section that are not reserved.

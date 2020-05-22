@@ -2,7 +2,9 @@ package com.sdu.calcite.sql.ddl;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlCharStringLiteral;
@@ -28,6 +30,8 @@ public class SqlCreateTable extends SqlCreate  {
     private final SqlIdentifier name;
     // 表列
     private final SqlNodeList columns;
+    // 水印
+    private final SqlWatermark watermark;
     // 属性
     private final SqlNodeList properties;
     // 注释
@@ -37,11 +41,13 @@ public class SqlCreateTable extends SqlCreate  {
         SqlParserPos pos,
         SqlIdentifier name,
         SqlNodeList columns,
+        SqlWatermark watermark,
         SqlCharStringLiteral comment,
         SqlNodeList properties) {
         super(OPERATOR, pos, false, false);
         this.name = requireNonNull(name, "table name should not be null");
         this.columns = requireNonNull(columns, "table columns should not be null");
+        this.watermark = watermark;
         this.comment = comment;
         this.properties = properties;
     }
@@ -62,17 +68,21 @@ public class SqlCreateTable extends SqlCreate  {
         return columns;
     }
 
-    public SqlCharStringLiteral getComment() {
-        return comment;
+    public Optional<SqlWatermark> getWatermark() {
+        return Optional.ofNullable(watermark);
     }
 
-    public SqlNodeList getProperties() {
-        return properties;
+    public Optional<SqlCharStringLiteral> getComment() {
+        return Optional.ofNullable(comment);
+    }
+
+    public Optional<SqlNodeList> getProperties() {
+        return Optional.ofNullable(properties);
     }
 
     @Override
     public List<SqlNode> getOperandList() {
-        return ImmutableNullableList.of(name, columns, comment, properties);
+        return ImmutableNullableList.of(name, columns, watermark, comment, properties);
     }
 
     @Override
@@ -94,6 +104,13 @@ public class SqlCreateTable extends SqlCreate  {
                 column.unparse(writer, leftPrec, rightPrec);
             }
         }
+
+        // 水印
+        if (watermark != null) {
+            printIndent(writer);
+            watermark.unparse(writer, leftPrec, rightPrec);
+        }
+
         writer.newlineAndIndent();
         writer.endList(frame);
 
@@ -122,5 +139,12 @@ public class SqlCreateTable extends SqlCreate  {
         writer.sep(",", false);
         writer.newlineAndIndent();
         writer.print("  ");
+    }
+
+    public static class TableCreationContext {
+
+        public List<SqlNode> columns = new ArrayList<>();
+        public SqlWatermark watermark;
+
     }
 }

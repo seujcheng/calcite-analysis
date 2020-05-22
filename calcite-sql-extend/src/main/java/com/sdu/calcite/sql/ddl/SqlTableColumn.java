@@ -3,10 +3,8 @@ package com.sdu.calcite.sql.ddl;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nonnull;
-import org.apache.calcite.adapter.java.JavaTypeFactory;
-import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
-import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlCharStringLiteral;
 import org.apache.calcite.sql.SqlDataTypeSpec;
@@ -22,9 +20,6 @@ import org.apache.calcite.util.ImmutableNullableList;
 public class SqlTableColumn extends SqlCall {
 
   private static final SqlSpecialOperator OPERATOR = new SqlSpecialOperator("COLUMN_DESC", SqlKind.COLUMN_DECL);
-
-  // TODO:
-  private static final JavaTypeFactory typeFactory = new JavaTypeFactoryImpl();
 
   private SqlIdentifier name;
   private SqlDataTypeSpec type;
@@ -48,13 +43,13 @@ public class SqlTableColumn extends SqlCall {
     return name;
   }
 
-  public SqlCharStringLiteral getPath() {
-    return path;
+  public Optional<SqlCharStringLiteral> getPath() {
+    return Optional.ofNullable(path);
   }
 
-  public SqlCharStringLiteral getComment() {
+  public Optional<SqlCharStringLiteral> getComment() {
     // comment.getNlsString().getValue()
-    return comment;
+    return Optional.ofNullable(comment);
   }
 
   public SqlDataTypeSpec getType() {

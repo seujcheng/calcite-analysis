@@ -76,16 +76,20 @@ SqlNode SqlOption() :
   *
   * 2: 计算列, 其语法格式: column AS compute_expression [COMMENT]
   *
+  * 3: Watermark, 其语法格式: WATERMARK FOR column AS watermark_expression
+  *
   * JavaCC解析列时, 需要看两个Token便可区分(即第二个Token是否为AS)
   */
-void TableColumn(List<SqlNode>list):
+void TableColumn(TableCreationContext context):
 {
 }
 {
    (LOOKAHEAD(2)
-      TableColumn2(list)
+      TableColumn2(context.columns)
    |
-      ComputeColumn(list)
+      ComputeColumn(context.columns)
+   |
+      Watermark(context)
    )
 }
 
@@ -100,6 +104,7 @@ void TableColumn2(List<SqlNode> list) :
 {
     name = SimpleIdentifier()
     type = DataType()
+    // QUOTED_STRING: 引号
     [
         <QUOTED_STRING> {
             String p = SqlParserUtil.parseString(token.image);
@@ -135,11 +140,31 @@ void ComputeColumn(List<SqlNode> list):
     }
 }
 
+void Watermark(TableCreationContext context):
+{
+   SqlIdentifier  eventTimeColumn;
+   SqlParserPos pos;
+   SqlNode strategy;
+}
+{
+    <WATERMARK> {pos = getPos();} <FOR>
+    eventTimeColumn = CompoundIdentifier()
+    <AS>
+    strategy = Expression(ExprContext.ACCEPT_NON_QUERY)
+    {
+        if (context.watermark != null) {
+          throw SqlUtil.newContextException(pos, ParserResource.RESOURCE.multipleWatermarksUnsupported());
+        }
+        context.watermark = new SqlWatermark(pos, eventTimeColumn, strategy);
+    }
+}
+
 SqlCreate SqlCreateTable(Span s, boolean replace) :
 {
     final SqlParserPos startPos = s.pos();
     SqlIdentifier name;
     SqlNodeList tableColumns = SqlNodeList.EMPTY;
+    SqlWatermark watermark = null;
     SqlNodeList properties = SqlNodeList.EMPTY;
     SqlCharStringLiteral comment = null;
 
@@ -156,16 +181,17 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
         <LPAREN>
             {
                 pos = getPos();
-                List<SqlNode> columns = new ArrayList<SqlNode>();
+                TableCreationContext context = new TableCreationContext();
             }
-            TableColumn(columns)
+            TableColumn(context)
             (
-                <COMMA> TableColumn(columns)
+                <COMMA> TableColumn(context)
             )*
         <RPAREN>
         {
             pos = pos.plus(getPos());
-            tableColumns = new SqlNodeList(columns, pos);
+            tableColumns = new SqlNodeList(context.columns, pos);
+            watermark = context.watermark;
         }
     ]
 
@@ -184,7 +210,7 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
     ]
 
     {
-        return new SqlCreateTable(startPos.plus(getPos()), name, tableColumns, comment, properties);
+        return new SqlCreateTable(startPos.plus(getPos()), name, tableColumns, watermark,  comment, properties);
     }
 }
 

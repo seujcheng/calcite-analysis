@@ -15,6 +15,8 @@ import com.sdu.calcite.plan.catalog.SduCatalogManagerSchema;
 import com.sdu.calcite.plan.catalog.SduCatalogTableColumn;
 import com.sdu.calcite.plan.catalog.SduCatalogTableColumnImpl;
 import com.sdu.calcite.plan.catalog.SduCatalogTableImpl;
+import com.sdu.calcite.plan.catalog.SduCatalogTableWatermark;
+import com.sdu.calcite.plan.catalog.SduCatalogTableWatermarkImpl;
 import com.sdu.calcite.plan.catalog.SduFunctionCatalog;
 import com.sdu.calcite.plan.catalog.SduObjectIdentifier;
 import com.sdu.calcite.plan.catalog.SduUnresolvedIdentifier;
@@ -34,7 +36,6 @@ import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlBasicCall;
-import org.apache.calcite.sql.SqlCharStringLiteral;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.dialect.CalciteSqlDialect;
@@ -122,7 +123,8 @@ public class SduPlannerImpl implements SduPlanner {
     final SduSqlValidator validator = getSqlPlanner().getOrCreateSqlValidator();
 
     // 列
-    final Map<String, RelDataType> physicalFieldNamesToTypes = new HashMap<>();
+    final Map<String, RelDataType> physicalColumnNameToTypes = new HashMap<>();
+    final Map<String, RelDataType> computedColumnNameToTypes = new HashMap<>();
     createTable.getColumns()
         .getList()
         .stream()
@@ -131,7 +133,7 @@ public class SduPlannerImpl implements SduPlanner {
           SqlTableColumn column = (SqlTableColumn) sqlNode;
           RelDataType relType = column.getType().deriveType(validator);
           String name = column.getName().getSimple();
-          physicalFieldNamesToTypes.put(name, relType);
+          physicalColumnNameToTypes.put(name, relType);
         });
 
     List<SduCatalogTableColumn> columns = new ArrayList<>();
@@ -140,21 +142,24 @@ public class SduPlannerImpl implements SduPlanner {
         // 物理列
         SqlTableColumn column = (SqlTableColumn) sqlNode;
         String name = column.getName().getSimple();
-        SqlCharStringLiteral columnComment = column.getComment();
-        String comment = columnComment == null ? null : columnComment.getNlsString().getValue();
+        String comment = column.getComment()
+            .map(stringLiteral -> stringLiteral.getNlsString().getValue())
+            .orElse("");
         columns.add(new SduCatalogTableColumnImpl(
             name,
-            physicalFieldNamesToTypes.get(name).getSqlTypeName().getName(),
+            physicalColumnNameToTypes.get(name).getSqlTypeName().getName(),
             null,
             comment
         ));
       } else if (sqlNode instanceof SqlBasicCall) {
-        // 虚拟列(计算列), 定义格式: column AS expr [COMMENT]
+        // 虚拟列(计算列), 定义格式: column AS expr, 解析格式: expr AS column
         SqlBasicCall call = (SqlBasicCall) sqlNode;
-        SqlNode validatedExpr = validator.validateParameterizedExpression(call.operand(0), physicalFieldNamesToTypes);
+        SqlNode validatedExpr = validator.validateParameterizedExpression(call.operand(0), physicalColumnNameToTypes);
         RelDataType validatedType = validator.getValidatedNodeType(validatedExpr);
+        String computedColumnName = call.operand(1).toString();
+        computedColumnNameToTypes.put(computedColumnName, validatedType);
         columns.add(new SduCatalogTableColumnImpl(
-            call.operand(1).toString(),
+            computedColumnName,
             validatedType.getSqlTypeName().getName(),
             getQuotedSqlString(validatedExpr),
             null
@@ -164,23 +169,48 @@ public class SduPlannerImpl implements SduPlanner {
       }
     }
 
+    // 水印列
+    SduCatalogTableWatermark tableWatermark = createTable.getWatermark()
+        .map(watermark -> {
+          String rowtimeColumn = watermark.getEventTimeColumn().toString();
+
+          Map<String, RelDataType> columnNameToTypes = new HashMap<>(physicalColumnNameToTypes);
+          columnNameToTypes.putAll(computedColumnNameToTypes);
+
+          // 校验语法是否合法
+          SqlNode expression = watermark.getStrategy();
+          SqlNode validated = validator.validateParameterizedExpression(expression, columnNameToTypes);
+          RelDataType validatedType = validator.getValidatedNodeType(validated);
+
+          return new SduCatalogTableWatermarkImpl(
+              rowtimeColumn,
+              getQuotedSqlString(validated),
+              validatedType.getSqlTypeName().getName()
+          );
+
+        }).orElse(null);
+
     // 表属性
     Map<String, String> tableProps = new HashMap<>();
     createTable.getProperties()
-        .getList()
-        .stream()
-        .filter(sqlNode -> sqlNode instanceof SqlOption)
-        .forEach(sqlNode -> {
-          SqlOption option = (SqlOption) sqlNode;
-          tableProps.put(option.getKeyString(), option.getValueString());
-        });
+        .ifPresent(sqlNodes ->
+            sqlNodes.getList()
+                .stream()
+                .filter(sqlNode -> sqlNode instanceof SqlOption)
+                .forEach(sqlNode -> {
+                  SqlOption option = (SqlOption) sqlNode;
+                  tableProps.put(option.getKeyString(), option.getValueString());
+                })
+        );
 
-    SqlCharStringLiteral tableComment = createTable.getComment();
-    String comment = tableComment != null ? tableComment.getNlsString().getValue() : null;
+    String comment = createTable.getComment()
+        .map(stringLiteral -> stringLiteral.getNlsString().getValue())
+        .orElse("");
 
-    //
+
     SduCatalogTableImpl catalogTable = new SduCatalogTableImpl(
         columns,
+        tableWatermark,
         comment,
         tableProps
     );
