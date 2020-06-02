@@ -18,7 +18,6 @@ import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.config.CalciteConnectionConfig;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
-import org.apache.calcite.config.Lex;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.plan.ConventionTraitDef;
 import org.apache.calcite.plan.RelOptCluster;
@@ -115,7 +114,7 @@ public class SduPlannerContext {
   }
 
   private SqlOperatorTable getBuiltinSqlOperatorTable() {
-    return ChainedSqlOperatorTable.of(new SduInternalFunctionTable(),
+    return ChainedSqlOperatorTable.of(SduInternalFunctionTable.instance(),
         new SduCatalogFunctionOperatorTable(typeFactory, functionCatalog));
   }
 
