@@ -14,10 +14,9 @@ import com.sdu.calcite.plan.catalog.SduFunctionCatalog;
 import com.sdu.calcite.plan.cost.SduRelOptCostFactory;
 import java.util.List;
 import java.util.Properties;
-import org.apache.calcite.avatica.util.Casing;
-import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.config.CalciteConnectionConfig;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;
+import org.apache.calcite.config.Lex;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.plan.ConventionTraitDef;
 import org.apache.calcite.plan.RelOptCluster;
@@ -36,6 +35,7 @@ import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.util.ChainedSqlOperatorTable;
+import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
@@ -91,11 +91,11 @@ public class SduPlannerContext {
     return tableConfig.getSqlParserConfig()
         .orElseGet(() ->
           SqlParser.configBuilder()
-              .setQuoting(Quoting.BACK_TICK)
-//              .setLex(Lex.JAVA)
+              .setLex(Lex.JAVA)
+              .setConformance(SqlConformanceEnum.DEFAULT)
               // 禁止转为大写
-              .setUnquotedCasing(Casing.UNCHANGED)
               .setParserFactory(new SduCalciteSqlParserFactory())
+              .setIdentifierMaxLength(256)
               .build()
         );
   }

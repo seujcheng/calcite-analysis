@@ -91,6 +91,18 @@ public class SduSqlSyntaxTest extends SduSqlBaseTest {
   }
 
   @Test
+  public void testTopN() throws Exception{
+    String path = "/sql6.txt";
+    String sqlText = readSqlText(path);
+    SqlNodeList sqlNodes = tableEnv.parseStmtList(sqlText);
+    RelNode relNode = validateAndRel(sqlNodes, tableEnv);
+    RelNode optimized = optimizer(relNode, tableEnv);
+    System.out.println("After optimize:");
+    System.out.println();
+    System.out.println(RelOptUtil.toString(optimized));
+  }
+
+  @Test
   public void testSelectSql() throws Exception {
     String path = "/sql7.txt";
     String sqlText = readSqlText(path);
@@ -102,15 +114,14 @@ public class SduSqlSyntaxTest extends SduSqlBaseTest {
   }
 
   @Test
-  public void testTopN() throws Exception{
-    String path = "/sql6.txt";
+  public void testUnionSql() throws Exception {
+    String path = "/sql8.txt";
     String sqlText = readSqlText(path);
     SqlNodeList sqlNodes = tableEnv.parseStmtList(sqlText);
     RelNode relNode = validateAndRel(sqlNodes, tableEnv);
-    RelNode optimized = optimizer(relNode, tableEnv);
-    System.out.println("After optimize:");
+    System.out.println("Before optimize:");
     System.out.println();
-    System.out.println(RelOptUtil.toString(optimized));
+    System.out.println(RelOptUtil.toString(relNode));
   }
 
   private static RelNode validateAndRel(SqlNodeList sqlNodes, SduTableEnvironment tableEnv) {
