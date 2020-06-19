@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.type.RelDataType;
+import org.apache.calcite.rel.type.RelDataTypeField;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlInsert;
 import org.apache.calcite.sql.SqlKind;
@@ -119,6 +121,21 @@ public class SduSqlSyntaxTest extends SduSqlBaseTest {
     String sqlText = readSqlText(path);
     SqlNodeList sqlNodes = tableEnv.parseStmtList(sqlText);
     RelNode relNode = validateAndRel(sqlNodes, tableEnv);
+    System.out.println("Before optimize:");
+    System.out.println();
+    System.out.println(RelOptUtil.toString(relNode));
+  }
+
+  @Test
+  public void testInternalFunctionSql() throws Exception {
+    String path = "/sql9.txt";
+    String sqlText = readSqlText(path);
+    SqlNodeList sqlNodes = tableEnv.parseStmtList(sqlText);
+    RelNode relNode = validateAndRel(sqlNodes, tableEnv);
+    RelDataType resultType = relNode.getRowType();
+    for (RelDataTypeField field : resultType.getFieldList()) {
+      System.out.println(field.getType());
+    }
     System.out.println("Before optimize:");
     System.out.println();
     System.out.println(RelOptUtil.toString(relNode));
