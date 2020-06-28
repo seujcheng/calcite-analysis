@@ -3,18 +3,22 @@ package com.sdu.calcite.plan.codegen;
 import static java.lang.String.format;
 
 import com.google.common.base.Preconditions;
+import com.sdu.calcite.table.data.SduGenericRowData;
+import com.sdu.calcite.table.data.SduRowData;
 import com.sdu.calcite.table.types.SduLogicalType;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.lang3.tuple.Pair;
 
-class CodeGenUtils {
+public class SduCodeGenUtils {
 
   private static final AtomicLong nameCounter = new AtomicLong(0);
 
-  static final String DEFAULT_INPUT1_TERM = "in1";
+  public static final String DEFAULT_INPUT1_TERM = "in1";
   static final String DEFAULT_INPUT2_TERM = "in2";
 
-  private CodeGenUtils() {
+  public static final String DEFAULT_OUTPUT1_TERM = "out1";
+
+  private SduCodeGenUtils() {
 
   }
 
@@ -23,25 +27,25 @@ class CodeGenUtils {
   }
 
 
-  public static GeneratedExpression generateInputAccess(
-      CodeGeneratorContext ctx,
+  public static SduGeneratedExpression generateInputAccess(
+      SduCodeGeneratorContext ctx,
       SduLogicalType inputType,
       String inputTerm,
       int index,
       boolean nullableInput) {
-    GeneratedExpression inputExpr = ctx.getReusableInputUnboxingExpression(inputTerm, index)
+    SduGeneratedExpression inputExpr = ctx.getReusableInputUnboxingExpression(inputTerm, index)
         .orElseGet(() -> {
           if (nullableInput) {
             throw new UnsupportedOperationException("Unsupported");
           }
 
-          GeneratedExpression expr = generateFieldAccess(ctx, inputType, inputTerm, index);
+          SduGeneratedExpression expr = generateFieldAccess(ctx, inputType, inputTerm, index);
           ctx.addReusableInputUnboxingExpression(inputTerm, index, expr);
 
           return expr;
         });
 
-    return new GeneratedExpression(
+    return new SduGeneratedExpression(
         inputExpr.getResultTerm(),
         inputExpr.getNullTerm(),
         "",
@@ -50,8 +54,42 @@ class CodeGenUtils {
     );
   }
 
+  public static String rowSetField(
+      SduCodeGeneratorContext ctx,
+      Class<? extends SduRowData> rowClass,
+      String rowTerm,
+      int index,
+      SduGeneratedExpression fieldExpr) {
+    if (rowClass == SduGenericRowData.class) {
+      String writeField = format("%s.setField(%d, %s);", rowTerm, index, fieldExpr.getResultTerm());
+      String setNullField = format("%s.setField(%d, null);", rowTerm, index);
 
-  private static GeneratedExpression generateFieldAccess(CodeGeneratorContext ctx, SduLogicalType inputType, String inputTerm, int index) {
+      String setCode;
+      if (ctx.nullCheck()) {
+        String codeTemplate = "%s \n"
+                            + "if (%s) { \n"
+                            + "  %s \n"
+                            + "} else { \n"
+                            + "  %s \n"
+                            + "}\n";
+        setCode = format(codeTemplate,
+            fieldExpr.getCode(),
+            fieldExpr.getNullTerm(),
+            setNullField,
+            writeField);
+      } else {
+        // read, write
+        setCode = format("%s \n %s", fieldExpr.getCode(), writeField);
+      }
+
+      return setCode;
+    }
+
+    throw new UnsupportedOperationException("Not support set field for " + rowClass);
+  }
+
+
+  private static SduGeneratedExpression generateFieldAccess(SduCodeGeneratorContext ctx, SduLogicalType inputType, String inputTerm, int index) {
     switch (inputType.getTypeRoot()) {
       case ROW:
         SduLogicalType fieldType = inputType.getChildren().get(index);
@@ -88,16 +126,15 @@ class CodeGenUtils {
           );
         }
 
-        return new GeneratedExpression(variables[0], variables[1], inputCode, fieldType);
+        return new SduGeneratedExpression(variables[0], variables[1], inputCode, fieldType);
 
         default:
-        throw new UnsupportedOperationException("wait develop");
+          throw new UnsupportedOperationException("wait develop");
     }
   }
 
-
   private static String rowFieldReadAccess(
-      CodeGeneratorContext ctx,
+      SduCodeGeneratorContext ctx,
       String inputTerm,
       int index,
       SduLogicalType fieldType) {
@@ -172,7 +209,7 @@ class CodeGenUtils {
   private static String primitiveDefaultValue(SduLogicalType t) {
     switch (t.getTypeRoot()) {
       case CHAR:
-      case VARCHAR: return "";
+      case VARCHAR: return "\"\"";
 
       case BOOLEAN: return "false";
 

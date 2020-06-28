@@ -3,7 +3,7 @@ package com.sdu.calcite.plan.codegen;
 import com.sdu.calcite.table.types.SduLogicalType;
 import java.util.Optional;
 
-public class GeneratedExpression {
+public class SduGeneratedExpression {
 
   // result variable
   private final String resultTerm;
@@ -14,7 +14,7 @@ public class GeneratedExpression {
   private final SduLogicalType resultType;
   private final Optional<Object> literalValue;
 
-  public GeneratedExpression(
+  public SduGeneratedExpression(
       String resultTerm,
       String nullTerm,
       String code,
@@ -22,7 +22,7 @@ public class GeneratedExpression {
     this(resultTerm, nullTerm, code, resultType, Optional.empty());
   }
 
-  public GeneratedExpression(
+  public SduGeneratedExpression(
       String resultTerm,
       String nullTerm,
       String code,
@@ -55,4 +55,14 @@ public class GeneratedExpression {
     return literalValue;
   }
 
+  @Override
+  public String toString() {
+    return "{" +
+        "resultTerm='" + resultTerm + '\'' +
+        ", nullTerm='" + nullTerm + '\'' +
+        ", code='" + code + '\'' +
+        ", resultType=" + resultType +
+        ", literalValue=" + literalValue +
+        '}';
+  }
 }

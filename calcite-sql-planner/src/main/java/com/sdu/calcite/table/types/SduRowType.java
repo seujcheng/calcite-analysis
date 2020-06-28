@@ -18,9 +18,9 @@ public class SduRowType extends SduLogicalType {
   private static final Set<String> INPUT_OUTPUT_CONVERSION = conversionSet(
       SduRowData.class.getName());
 
-  private List<RowField> fields;
+  private List<SduRowField> fields;
 
-  private SduRowType(List<RowField> fields) {
+  private SduRowType(List<SduRowField> fields) {
     super(true, SduLogicalTypeRoot.ROW);
     this.fields = Collections.unmodifiableList(
         new ArrayList<>(
@@ -28,7 +28,7 @@ public class SduRowType extends SduLogicalType {
     validateFields(fields);
   }
 
-  public SduRowType(boolean isNullable, List<RowField> fields) {
+  public SduRowType(boolean isNullable, List<SduRowField> fields) {
     super(isNullable, SduLogicalTypeRoot.ROW);
     this.fields = Collections.unmodifiableList(
         new ArrayList<>(
@@ -38,14 +38,14 @@ public class SduRowType extends SduLogicalType {
   }
 
   public int getFieldCount() {
-    throw new RuntimeException("");
+    return this.fields.size();
   }
 
   @Override
   public List<SduLogicalType> getChildren() {
     return Collections.unmodifiableList(
         fields.stream()
-            .map(RowField::getType)
+            .map(SduRowField::getType)
             .collect(Collectors.toList())
     );
   }
@@ -65,7 +65,7 @@ public class SduRowType extends SduLogicalType {
     return visitor.visit(this);
   }
 
-  public static final class RowField implements Serializable {
+  public static final class SduRowField implements Serializable {
 
     private final String name;
 
@@ -73,7 +73,7 @@ public class SduRowType extends SduLogicalType {
 
     private final @Nullable String description;
 
-    public RowField(String name, SduLogicalType type, @Nullable String description) {
+    public SduRowField(String name, SduLogicalType type, @Nullable String description) {
       this.name = Preconditions.checkNotNull(name, "Field name must not be null.");
       this.type = Preconditions.checkNotNull(type, "Field type must not be null.");
       this.description = description;
@@ -94,14 +94,14 @@ public class SduRowType extends SduLogicalType {
   }
 
   public static SduRowType of(SduLogicalType[] types, String[] names) {
-    List<RowField> fields = new ArrayList<>();
+    List<SduRowField> fields = new ArrayList<>();
     for (int i = 0; i < types.length; i++) {
-      fields.add(new RowField(names[i], types[i], null));
+      fields.add(new SduRowField(names[i], types[i], null));
     }
     return new SduRowType(fields);
   }
 
-  private static void validateFields(List<RowField> fields) {
+  private static void validateFields(List<SduRowField> fields) {
     final List<String> fieldNames = fields.stream()
         .map(f -> f.name)
         .collect(Collectors.toList());

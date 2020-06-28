@@ -19,13 +19,6 @@ public class SduVarCharType extends SduLogicalType {
 
   public SduVarCharType(int length) {
     super(true, SduLogicalTypeRoot.VARCHAR);
-    if (length < MIN_LENGTH) {
-      throw new SduValidationException(
-          String.format(
-              "Variable character string length must be between %d and %d (both inclusive).",
-              MIN_LENGTH,
-              MAX_LENGTH));
-    }
     this.length = length;
   }
 
