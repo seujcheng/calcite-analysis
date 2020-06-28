@@ -3,6 +3,18 @@ package com.sdu.calcite.plan;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.sdu.calcite.api.SduTableException;
+import com.sdu.calcite.table.types.SduBigIntType;
+import com.sdu.calcite.table.types.SduBooleanType;
+import com.sdu.calcite.table.types.SduCharType;
+import com.sdu.calcite.table.types.SduDoubleType;
+import com.sdu.calcite.table.types.SduFloatType;
+import com.sdu.calcite.table.types.SduIntType;
+import com.sdu.calcite.table.types.SduLogicalType;
+import com.sdu.calcite.table.types.SduRowType;
+import com.sdu.calcite.table.types.SduSmallIntType;
+import com.sdu.calcite.table.types.SduTinyIntType;
+import com.sdu.calcite.table.types.SduVarCharType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
@@ -13,6 +25,7 @@ import java.util.Map;
 import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
+import org.apache.calcite.rel.type.RelRecordType;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.util.ConversionUtil;
 
@@ -179,6 +192,50 @@ public class SduCalciteTypeFactory extends JavaTypeFactoryImpl {
   public Charset getDefaultCharset() {
     // SQL中文处理
     return Charset.forName(ConversionUtil.NATIVE_UTF16_CHARSET_NAME);
+  }
+
+  public static SduLogicalType toLogicalType(RelDataType relDataType) {
+    switch (relDataType.getSqlTypeName()) {
+      case BOOLEAN: return new SduBooleanType();
+
+      case TINYINT: return new SduTinyIntType();
+
+      case SMALLINT: return new SduSmallIntType();
+
+      case INTEGER: return new SduIntType();
+
+      case BIGINT: return new SduBigIntType();
+
+      case FLOAT: return new SduFloatType();
+
+      case DOUBLE: return new SduDoubleType();
+
+      case CHAR: return relDataType.getPrecision() == 0 ? SduCharType.ofEmptyLiteral()
+                                                        : new SduCharType(relDataType.getPrecision());
+
+      case VARCHAR: return relDataType.getPrecision() == 0 ? SduVarCharType.ofEmptyLiteral()
+                                                           : new SduVarCharType(relDataType.getPrecision());
+
+      case ROW:
+        if (relDataType instanceof RelRecordType) {
+          return toLogicalRowType(relDataType);
+        }
+
+      default:
+        throw new SduTableException("Type is not supported: " + relDataType);
+    }
+  }
+
+
+  private static SduRowType toLogicalRowType(RelDataType relDataType) {
+    SduLogicalType[] fieldTypes = relDataType.getFieldList()
+        .stream()
+        .map(fieldType -> toLogicalType(fieldType.getType()))
+        .toArray(SduLogicalType[]::new);
+
+    String[] fieldNames = relDataType.getFieldNames().toArray(new String[0]);
+
+    return SduRowType.of(fieldTypes, fieldNames);
   }
 
 }
