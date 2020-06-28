@@ -40,6 +40,11 @@ public class SduFloatType extends SduLogicalType {
   }
 
   @Override
+  public String asSummaryString() {
+    return SduFloatType.class.getName();
+  }
+
+  @Override
   public <R> R accept(SduLogicalTypeVisitor<R> visitor) {
     return visitor.visit(this);
   }

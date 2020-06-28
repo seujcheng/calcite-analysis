@@ -32,6 +32,13 @@ public abstract class SduLogicalType implements Serializable {
 
   public abstract boolean supportsOutputConversion(Class<?> clazz);
 
+  public abstract String asSummaryString();
+
+  @Override
+  public String toString() {
+    return asSummaryString();
+  }
+
   // 访问者模式
   public abstract <R> R accept(SduLogicalTypeVisitor<R> visitor);
 

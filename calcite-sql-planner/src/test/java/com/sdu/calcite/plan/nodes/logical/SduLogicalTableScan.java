@@ -96,21 +96,21 @@ public class SduLogicalTableScan extends TableScan implements SduLogicalRel, Sdu
     SduRowType inputType = new SduRowType(true, fields);
 
     SduGenericRowData data01 = new SduGenericRowData(5);
-    data01.setField(0, 10001);
+    data01.setField(0, 10001L);
     data01.setField(1, "张小龙");
     data01.setField(2, 18);
     data01.setField(3, 13567834567L);
     data01.setField(4, "北京市朝阳区望京花园");
 
     SduGenericRowData data02 = new SduGenericRowData(5);
-    data02.setField(0, 10002);
+    data02.setField(0, 10002L);
     data02.setField(1, "王晓飞");
     data02.setField(2, 23);
     data02.setField(3, 13699870932L);
     data02.setField(4, "北京市海淀区上地东里");
 
     SduGenericRowData data03 = new SduGenericRowData(5);
-    data03.setField(0, 10003);
+    data03.setField(0, 10003L);
     data03.setField(1, "李萌萌");
     data03.setField(2, 33);
     data03.setField(3, 13933870932L);

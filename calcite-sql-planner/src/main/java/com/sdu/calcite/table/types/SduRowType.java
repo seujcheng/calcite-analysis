@@ -61,6 +61,11 @@ public class SduRowType extends SduLogicalType {
   }
 
   @Override
+  public String asSummaryString() {
+    return SduRowType.class.getName();
+  }
+
+  @Override
   public <R> R accept(SduLogicalTypeVisitor<R> visitor) {
     return visitor.visit(this);
   }

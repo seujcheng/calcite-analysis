@@ -101,14 +101,14 @@ public class SduExprCodeGenerator implements RexVisitor<SduGeneratedExpression> 
     }
 
     // Out row initialize
-    String outRowInitCode = format("private final %s %s = new %s(%d);",
+    String outRowInitCode = format("final %s %s = new %s(%d);",
         outClass.getName(), outRowTerm, outClass.getName(), resultType.getFieldCount());
-    ctx.addReusableMember(outRowInitCode);
+//    ctx.addReusableMember(outRowInitCode);
 
     // Result code
     String returnCode = format("return %s;", outRowTerm);
 
-    String bodyCode = format("%s \n %s", setFieldCode.toString(), returnCode);
+    String bodyCode = format("%s \n %s \n %s", outRowInitCode, setFieldCode.toString(), returnCode);
 
     return new SduGeneratedExpression(outRowTerm, "false", bodyCode, resultType);
   }

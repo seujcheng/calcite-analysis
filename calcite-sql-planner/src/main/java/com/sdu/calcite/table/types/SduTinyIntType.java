@@ -41,6 +41,11 @@ public class SduTinyIntType extends SduLogicalType {
   }
 
   @Override
+  public String asSummaryString() {
+    return SduTinyIntType.class.getName();
+  }
+
+  @Override
   public <R> R accept(SduLogicalTypeVisitor<R> visitor) {
     return visitor.visit(this);
   }

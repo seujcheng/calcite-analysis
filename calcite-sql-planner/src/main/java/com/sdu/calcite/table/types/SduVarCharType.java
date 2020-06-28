@@ -63,6 +63,11 @@ public class SduVarCharType extends SduLogicalType {
   }
 
   @Override
+  public String asSummaryString() {
+    return SduVarCharType.class.getName();
+  }
+
+  @Override
   public <R> R accept(SduLogicalTypeVisitor<R> visitor) {
     return visitor.visit(this);
   }

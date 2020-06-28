@@ -72,6 +72,11 @@ public class SduCharType extends SduLogicalType {
   }
 
   @Override
+  public String asSummaryString() {
+    return SduCharType.class.getName();
+  }
+
+  @Override
   public <R> R accept(SduLogicalTypeVisitor<R> visitor) {
     return visitor.visit(this);
   }

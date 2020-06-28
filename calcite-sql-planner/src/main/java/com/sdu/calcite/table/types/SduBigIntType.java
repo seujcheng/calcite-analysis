@@ -40,6 +40,11 @@ public class SduBigIntType extends SduLogicalType {
   }
 
   @Override
+  public String asSummaryString() {
+    return SduBigIntType.class.getName();
+  }
+
+  @Override
   public <R> R accept(SduLogicalTypeVisitor<R> visitor) {
     return visitor.visit(this);
   }
