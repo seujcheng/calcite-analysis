@@ -4,16 +4,17 @@ import static com.sdu.calcite.plan.codegen.SduCodeGenUtils.DEFAULT_INPUT2_TERM;
 import static com.sdu.calcite.plan.codegen.SduCodeGenUtils.generateInputAccess;
 import static com.sdu.calcite.plan.codegen.SduCodeGenUtils.rowSetField;
 import static java.lang.String.format;
+import static java.lang.String.join;
 
 import com.sdu.calcite.plan.SduCalciteTypeFactory;
-import com.sdu.calcite.table.data.SduGenericRowData;
 import com.sdu.calcite.table.data.SduRowData;
 import com.sdu.calcite.table.types.SduLogicalType;
 import com.sdu.calcite.table.types.SduRowType;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.rex.RexCorrelVariable;
 import org.apache.calcite.rex.RexDynamicParam;
@@ -89,16 +90,9 @@ public class SduExprCodeGenerator implements RexVisitor<SduGeneratedExpression> 
     }
 
     // setField
-    List<String> setFieldCodes = new ArrayList<>();
-    int i = 0;
-    for (SduGeneratedExpression expr : fieldExpressions) {
-      setFieldCodes.add(rowSetField(ctx, SduGenericRowData.class, outRowTerm, i++, expr));
-    }
-    StringBuilder setFieldCode = new StringBuilder();
-    for (String code : setFieldCodes) {
-      setFieldCode.append(code);
-      setFieldCode.append("\n");
-    }
+    String setFieldCode = IntStream.range(0, fieldExpressions.size())
+        .mapToObj(index -> rowSetField(ctx, outClass, outRowTerm, index, fieldExpressions.get(index)))
+        .collect(Collectors.joining("\n"));
 
     // Out row initialize
     String outRowInitCode = format("final %s %s = new %s(%d);",
@@ -108,7 +102,7 @@ public class SduExprCodeGenerator implements RexVisitor<SduGeneratedExpression> 
     // Result code
     String returnCode = format("return %s;", outRowTerm);
 
-    String bodyCode = format("%s \n %s \n %s", outRowInitCode, setFieldCode.toString(), returnCode);
+    String bodyCode = join("\n", outRowInitCode, setFieldCode.toString(), returnCode);
 
     return new SduGeneratedExpression(outRowTerm, "false", bodyCode, resultType);
   }

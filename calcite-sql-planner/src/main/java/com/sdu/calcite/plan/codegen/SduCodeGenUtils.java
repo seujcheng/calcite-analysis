@@ -1,6 +1,7 @@
 package com.sdu.calcite.plan.codegen;
 
 import static java.lang.String.format;
+import static java.lang.String.join;
 
 import com.google.common.base.Preconditions;
 import com.sdu.calcite.table.data.SduGenericRowData;
@@ -79,7 +80,7 @@ public class SduCodeGenUtils {
             writeField);
       } else {
         // read, write
-        setCode = format("%s \n %s", fieldExpr.getCode(), writeField);
+        setCode = join("\n", fieldExpr.getCode(), writeField);
       }
 
       return setCode;
