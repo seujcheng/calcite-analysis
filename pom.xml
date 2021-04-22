@@ -16,7 +16,7 @@
     </modules>
 
     <properties>
-        <calcite.version>1.20.0</calcite.version>
+        <calcite.version>1.26.0</calcite.version>
         <fmpp-maven-plugin.version>1.0</fmpp-maven-plugin.version>
         <javacc-maven-plugin.version>2.4</javacc-maven-plugin.version>
     </properties>
